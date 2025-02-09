@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="English">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="generator" content="VuePress 2.0.0-rc.19" />
+    <style>
+      :root {
+        --vp-c-bg: #fff;
+      }
+
+      [data-theme='dark'] {
+        --vp-c-bg: #1b1b1f;
+      }
+
+      html,
+      body {
+        background-color: var(--vp-c-bg);
+      }
+    </style>
+    <script>
+      const userMode = localStorage.getItem('vuepress-color-scheme')
+      const systemDarkMode =
+        'matchMedia' in window
+          ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          : false
+
+      if (userMode === 'light') {
+        document.documentElement.dataset.theme = 'light'
+      } else if (userMode === 'dark' || systemDarkMode) {
+        document.documentElement.dataset.theme = 'dark'
+      }
+    </script>
+    <link rel="icon" href="/images/logo.png"><title>Three Vue3</title><meta name="description" content="A vue3.x component library of Three.js.">
+    <link rel="preload" href="/assets/style-V1f7k019.css" as="style"><link rel="stylesheet" href="/assets/style-V1f7k019.css">
+    <link rel="modulepreload" href="/assets/app-Bj0k8yg1.js"><link rel="modulepreload" href="/assets/404.html-ZbSrfT1d.js">
+    <link rel="prefetch" href="/assets/index.html-CZxLgKil.js" as="script"><link rel="prefetch" href="/assets/getting-started.html-DopTaP_r.js" as="script"><link rel="prefetch" href="/assets/model-loader.html-DEfpJD9m.js" as="script"><link rel="prefetch" href="/assets/popup.html-cHyV9qOl.js" as="script"><link rel="prefetch" href="/assets/scene.html-DckWDFQF.js" as="script"><link rel="prefetch" href="/assets/sky-box.html-jcwotXpN.js" as="script"><link rel="prefetch" href="/assets/index.html-B0CVTbQ1.js" as="script"><link rel="prefetch" href="/assets/getting-started.html-SNMJm116.js" as="script"><link rel="prefetch" href="/assets/model-loader.html-BOKUvz2M.js" as="script"><link rel="prefetch" href="/assets/popup.html-kmmcafJz.js" as="script"><link rel="prefetch" href="/assets/scene.html-CQrsjaAE.js" as="script"><link rel="prefetch" href="/assets/sky-box.html-czSqN0lO.js" as="script"><link rel="prefetch" href="/assets/setupDevtools-7MC2TMWH-DDuE8Sqz.js" as="script">
+  </head>
+  <body>
+    <div id="app"><!--[--><div class="vp-theme-container" vp-container data-v-13a50144><main class="page" data-v-13a50144><div vp-content data-v-13a50144><h1 data-v-13a50144>404</h1><blockquote data-v-13a50144>There&#39;s nothing here.</blockquote><a class="route-link" href="/" data-v-13a50144>Take me home</a></div></main></div><!--[--><!----><!--]--><!--]--></div>
+    <script type="module" src="/assets/app-Bj0k8yg1.js" defer></script>
+  </body>
+</html>
