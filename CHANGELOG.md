@@ -1,3 +1,12 @@
+## [0.0.5] - 2025-02-15
+
+### Add
+
+- Add WaveCircleMesh.
+- Add Bloom effect.
+
+---
+
 ## [0.0.4] - 2025-02-14
 
 ### Add

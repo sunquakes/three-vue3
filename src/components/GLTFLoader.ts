@@ -1,4 +1,4 @@
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, inject } from 'vue'
 import * as THREE from 'three'
 import { GLTFLoader } from '../utils/ModelLoader'
 
@@ -6,10 +6,12 @@ export default defineComponent({
   setup(props, { emit }) {
     return {
       async init() {
+        const sceneSlotProps: SceneSlotProps | undefined = inject('sceneSlotProps')
+        const scene = sceneSlotProps?.scene
         const model = await GLTFLoader(props.modelValue, props.cache, (event) =>
           emit('onProgress', event)
         )
-        props.scene.add(model)
+        scene.add(model)
         emit('loaded', model)
       }
     }

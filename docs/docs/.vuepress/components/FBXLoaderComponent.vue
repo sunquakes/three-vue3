@@ -1,6 +1,6 @@
 <template>
-  <tv-scene class="scene" v-model="sceneValue" @created="created">
-    <tv-fbx-loader v-model="fbxUrl" :scene="sceneValue"></tv-fbx-loader>
+  <tv-scene class="scene" @created="created">
+    <tv-fbx-loader v-model="fbxUrl"></tv-fbx-loader>
   </tv-scene>
 </template>
 
@@ -8,7 +8,6 @@
 import { ref } from 'vue'
 
 const fbxUrl = ref('/models/girl.fbx')
-const sceneValue = ref(null)
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)

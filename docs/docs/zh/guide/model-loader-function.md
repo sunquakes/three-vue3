@@ -117,9 +117,9 @@ const created = async (scene, { camera }) => {
 
 ## Parametersa
 
-| Name       | Type     | Default | Description                                                                         |
-| ---------- | -------- | ------- | ----------------------------------------------------------------------------------- |
-| url        | string   |         | `必需` 模型的 URL。                                                                 |
-| mtlUrl     | string   |         | ?`必需` 模型的材质 URL。只有 `OBJLoader` 有这个参数。                               |
-| cache      | boolean  | true    | `可选` 是否将模型缓存到 IndexedDB 中。                                              |
-| onProgress | function |         | `可选` 模型加载进度的回调函数。 (event: {type: string, progress: number}) => void。 |
+| 名称       | 类型     | 默认值 | 描述                                                                                |
+| ---------- | -------- | ------ | ----------------------------------------------------------------------------------- |
+| url        | string   |        | `必需` 模型的 URL。                                                                 |
+| mtlUrl     | string   |        | ?`必需` 模型的材质 URL。只有 `OBJLoader` 有这个参数。                               |
+| cache      | boolean  | true   | `可选` 是否将模型缓存到 IndexedDB 中。                                              |
+| onProgress | function |        | `可选` 模型加载进度的回调函数。 (event: {type: string, progress: number}) => void。 |

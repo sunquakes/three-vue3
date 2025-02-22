@@ -1,20 +1,7 @@
 import { defaultTheme } from '@vuepress/theme-default'
 import { defineUserConfig } from 'vuepress/cli'
 import { viteBundler } from '@vuepress/bundler-vite'
-
-const getChildren = (options) => {
-  return [
-    'getting-started',
-    'scene',
-    'sky-box',
-    {
-      text: options.modelLoaderText,
-      children: ['model-loader-component', 'model-loader-function']
-    },
-    'popup',
-    'movable-element'
-  ]
-}
+import getChildren from './sidebar'
 
 export default defineUserConfig({
   lang: 'en-US',
@@ -40,7 +27,9 @@ export default defineUserConfig({
           '/guide/': [
             {
               children: getChildren({
-                modelLoaderText: 'Model Loader'
+                modelLoaderText: 'Model Loader',
+                meshText: 'Mesh',
+                effectText: 'Effect'
               })
             }
           ]
@@ -56,7 +45,9 @@ export default defineUserConfig({
           '/zh/guide/': [
             {
               children: getChildren({
-                modelLoaderText: '模型加载器'
+                modelLoaderText: '模型加载器',
+                meshText: '网格模型',
+                effectText: '效果'
               })
             }
           ]

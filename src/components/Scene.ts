@@ -1,4 +1,4 @@
-import { defineComponent, h, PropType, ref, nextTick } from 'vue'
+import { defineComponent, h, PropType, ref, nextTick, provide, reactive } from 'vue'
 import { generateUUID } from '../utils/UUID'
 import Scene from '../utils/Scene'
 import Camera from '../utils/Camera'
@@ -16,11 +16,56 @@ export default defineComponent({
     'update:light',
     'update:axesHelper',
     'update:controls',
-    'created'
+    'created',
+    'beforeFrame',
+    'frame',
+    'afterFrame'
   ],
   setup(props, { emit }) {
     let UUID = ref()
     const showSlot = ref(false)
+
+    const beforeFrameChildren = reactive<Array<CallbackFrame>>([])
+    const afterFrameChildren = reactive<Array<CallbackFrame>>([])
+
+    const sceneSlotProps: SceneSlotProps = {}
+    provide('sceneSlotProps', sceneSlotProps)
+
+    let callbackFrame: CallbackFrame = (
+      renderer: THREE.WebGLRenderer,
+      scene: THREE.Scene,
+      components: SceneComponents
+    ) => {
+      const camera = components.camera
+      renderer.clearDepth()
+      camera.layers.set(0)
+      renderer.render(scene, camera)
+    }
+
+    function frame(renderer: THREE.WebGLRenderer, scene: THREE.Scene, components: SceneComponents) {
+      callbackFrame(renderer, scene, components)
+    }
+    function beforeFrame(
+      renderer: THREE.WebGLRenderer,
+      scene: THREE.Scene,
+      components: SceneComponents
+    ) {
+      emit('beforeFrame', renderer, scene, components)
+      beforeFrameChildren?.forEach((beforeFrameChild) => {
+        beforeFrameChild?.(renderer, scene, components)
+      })
+    }
+    function afterFrame(
+      renderer: THREE.WebGLRenderer,
+      scene: THREE.Scene,
+      components: SceneComponents
+    ) {
+      emit('afterFrame', renderer, scene, components)
+      afterFrameChildren?.forEach((afterFrameChild) => {
+        afterFrameChild?.(renderer, scene, components)
+      })
+    }
+
     return {
       UUID,
       showSlot,
@@ -28,7 +73,8 @@ export default defineComponent({
         UUID.value = generateUUID()
         await nextTick()
 
-        const container = document.getElementById(UUID.value)
+        const element = document.getElementById(UUID.value)
+        const container = element || undefined
         if (!container) {
           console.error(`Container with id "${UUID.value}" not found`)
           return
@@ -37,9 +83,6 @@ export default defineComponent({
         if (renderer == undefined) {
           renderer = Renderer()
           emit('update:renderer', renderer)
-        }
-        if (props.clearColor != undefined) {
-          renderer.setClearColor(props.clearColor)
         }
         let camera = props.camera
         if (camera == undefined) {
@@ -61,15 +104,40 @@ export default defineComponent({
           controls = new OrbitControls(camera, container)
           emit('update:controls', controls)
         }
-        const scene = Scene(renderer, container, { camera, light, axesHelper, controls })
+        const sceneComponents: SceneComponents = {
+          camera: camera,
+          light: light,
+          axesHelper: axesHelper,
+          controls: controls
+        }
+        const scene = Scene(renderer, container, sceneComponents, frame, beforeFrame, afterFrame)
         if (props.bgImage != undefined) {
           const textureLoader = new THREE.TextureLoader()
           const texture = textureLoader.load(props.bgImage)
           scene.background = texture
+        } else if (props.bgColor != undefined) {
+          scene.background = new THREE.Color(props.bgColor)
         }
-        showSlot.value = true
         emit('update:modelValue', scene)
-        emit('created', scene, { camera, light, axesHelper, controls })
+        emit('created', scene, sceneComponents)
+
+        Object.assign(sceneSlotProps, {
+          container: container,
+          renderer: renderer,
+          scene: scene,
+          sceneComponents: sceneComponents,
+          setFrame: (callback: CallbackFrame) => {
+            callbackFrame = callback
+          },
+          addBeforeFrame: (callback: CallbackFrame) => {
+            beforeFrameChildren.push(callback)
+          },
+          addAfterFrame: (callback: CallbackFrame) => {
+            afterFrameChildren.push(callback)
+          }
+        })
+
+        showSlot.value = true
       }
     }
   },
@@ -90,7 +158,7 @@ export default defineComponent({
     renderer: {
       type: Object as PropType<THREE.WebGLRenderer>
     },
-    clearColor: {
+    bgColor: {
       type: String
     },
     bgImage: {

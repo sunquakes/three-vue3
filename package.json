@@ -1,7 +1,7 @@
 {
   "name": "three-vue3",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Shing Rui <sunquakes@outlook.com>",
   "keywords": [
     "three.js",

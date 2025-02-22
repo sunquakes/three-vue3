@@ -33,13 +33,13 @@ title: 场景
 
 ## 背景颜色
 
-<SceneClearColor />
+<SceneBgColor />
 
 ::: details 点击我查看代码
 
 ```vue
 <template>
-  <tv-scene class="scene" clear-color="#bcedce"></tv-scene>
+  <tv-scene class="scene" bg-color="#98F5F9"></tv-scene>
 </template>
 
 <script lang="ts" setup></script>
@@ -55,7 +55,7 @@ title: 场景
 
 :::
 
-## 背景图片 
+## 背景图片
 
 <SceneBgImage />
 
@@ -81,7 +81,7 @@ title: 场景
 
 ## 属性
 
-| 名称               | 类型                        | 默认值                  | Description                                                       |
+| 名称               | 类型                        | 默认值                  | 描述                                                              |
 | ------------------ | --------------------------- | ----------------------- | ----------------------------------------------------------------- |
 | v-model            | THREE.Scene                 | THREE.Scene             | `可选` 组件挂载后，值将是从 undefined 变为 THREE.Scene 实例。     |
 | v-model:renderer   | THREE.WebGLRenderer         | THREE.WebGLRenderer     | `可选`                                                            |
@@ -92,6 +92,7 @@ title: 场景
 
 ## 方法
 
-| 名称    | 参数                                                    | 描述                       |
-| ------- | ------------------------------------------------------- | -------------------------- |
-| created | (scene, {camera, light, axesHelper, controls }) => void | 组件挂载并创建场景时调用。 |
+| 名称          | 参数                                                                                                            | 描述                       |
+| ------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| created       | (scene, {camera, light, axesHelper, controls }) => void                                                         | 组件挂载并创建场景时调用。 |
+| callbackFrame | (renderer: THREE.WebGLRenderer, scene: THREE.Scene, components: {camera, light, axesHelper, controls }) => void | 帧回调函数。               |

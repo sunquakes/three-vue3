@@ -17,8 +17,8 @@ Component
 
 ```vue
 <template>
-  <tv-scene class="scene" v-model="sceneValue" @created="created">
-    <tv-gltf-loader v-model="gltfUrl" :scene="sceneValue"></tv-gltf-loader>
+  <tv-scene class="scene" @created="created">
+    <tv-gltf-loader v-model="gltfUrl"></tv-gltf-loader>
   </tv-scene>
 </template>
 
@@ -26,7 +26,6 @@ Component
 import { ref } from 'vue'
 
 const gltfUrl = ref('/models/girl.glb')
-const sceneValue = ref(null)
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
@@ -54,8 +53,8 @@ const created = (scene, { camera }) => {
 
 ```vue
 <template>
-  <tv-scene class="scene" v-model="sceneValue" @created="created">
-    <tv-fbx-loader v-model="fbxUrl" :scene="sceneValue"></tv-fbx-loader>
+  <tv-scene class="scene" @created="created">
+    <tv-fbx-loader v-model="fbxUrl"></tv-fbx-loader>
   </tv-scene>
 </template>
 
@@ -63,7 +62,6 @@ const created = (scene, { camera }) => {
 import { ref } from 'vue'
 
 const fbxUrl = ref('/models/girl.fbx')
-const sceneValue = ref(null)
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
@@ -91,8 +89,8 @@ const created = (scene, { camera }) => {
 
 ```vue
 <template>
-  <tv-scene class="scene" v-model="sceneValue" @created="created">
-    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scene="sceneValue"></tv-obj-loader>
+  <tv-scene class="scene" @created="created">
+    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl"></tv-obj-loader>
   </tv-scene>
 </template>
 
@@ -101,7 +99,6 @@ import { ref } from 'vue'
 
 const objUrl = ref('/models/obj/girl.obj')
 const mtlUrl = ref('/models/obj/girl.mtl')
-const sceneValue = ref(null)
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
@@ -115,6 +112,7 @@ const created = (scene, { camera }) => {
   height: 300px;
 }
 </style>
+
 ```
 
 :::

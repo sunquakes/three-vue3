@@ -1,6 +1,6 @@
 <template>
-  <tv-scene class="scene" v-model="sceneValue" @created="created">
-    <tv-gltf-loader v-model="gltfUrl" :scene="sceneValue"></tv-gltf-loader>
+  <tv-scene class="scene" @created="created">
+    <tv-gltf-loader v-model="gltfUrl"></tv-gltf-loader>
   </tv-scene>
 </template>
 
@@ -8,7 +8,6 @@
 import { ref } from 'vue'
 
 const gltfUrl = ref('/models/girl.glb')
-const sceneValue = ref(null)
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)

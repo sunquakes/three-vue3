@@ -1,6 +1,6 @@
 <template>
-  <tv-scene class="scene" v-model="sceneValue" @created="created">
-    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scene="sceneValue"></tv-obj-loader>
+  <tv-scene class="scene" @created="created">
+    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl"></tv-obj-loader>
   </tv-scene>
 </template>
 
@@ -9,7 +9,6 @@ import { ref } from 'vue'
 
 const objUrl = ref('/models/obj/girl.obj')
 const mtlUrl = ref('/models/obj/girl.mtl')
-const sceneValue = ref(null)
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)

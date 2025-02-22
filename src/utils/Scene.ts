@@ -1,19 +1,16 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import LabelRenderer from './LabelRenderer'
-
-interface Components {
-  camera: THREE.Camera
-  light: THREE.Light
-  axesHelper: THREE.AxesHelper | undefined | boolean
-  controls: OrbitControls | undefined | boolean
-}
+import CSS2DRenderer from './CSS2DRenderer'
 
 export default function (
   renderer: THREE.WebGLRenderer,
   container: HTMLElement,
-  components: Components
+  components: SceneComponents,
+  frame: CallbackFrame,
+  beforeFrame?: CallbackFrame,
+  afterFrame?: CallbackFrame
 ): THREE.Scene {
+  const camera = components.camera
   const scene = new THREE.Scene()
   scene.add(components.light)
 
@@ -23,16 +20,19 @@ export default function (
   renderer.setSize(containerWidth, containerHeight)
   container.appendChild(renderer.domElement)
 
-  const labelRenderer = LabelRenderer(container)
-  container.appendChild(labelRenderer.domElement)
+  const css2DRenderer = CSS2DRenderer(container)
+  container.appendChild(css2DRenderer.domElement)
+  renderer.autoClear = false
 
   function animate() {
-    requestAnimationFrame(animate)
+    beforeFrame?.(renderer, scene, components)
     if (components.controls instanceof OrbitControls) {
       components.controls.update()
     }
-    renderer.render(scene, components.camera)
-    labelRenderer.render(scene, components.camera)
+    frame(renderer, scene, components)
+    css2DRenderer.render(scene, camera)
+    afterFrame?.(renderer, scene, components)
+    requestAnimationFrame(animate)
   }
   animate()
 
@@ -42,7 +42,7 @@ export default function (
 
   function onWindowResize() {
     renderer.setSize(containerWidth, containerHeight)
-    labelRenderer.setSize(containerWidth, containerHeight)
+    css2DRenderer.setSize(containerWidth, containerHeight)
   }
 
   window.addEventListener('resize', onWindowResize)

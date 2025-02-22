@@ -6,6 +6,8 @@ import OBJLoader from './components/OBJLoader'
 import SkyBox from './utils/SkyBox'
 import Popup from './utils/Popup'
 import ME from './utils/ME'
+import WaveCircleMesh from './meshes/WaveCircleMesh'
+import Bloom from './components/Bloom'
 
 // component
 export default {
@@ -14,11 +16,15 @@ export default {
     app.component('tv-gltf-loader', GLTFLoader)
     app.component('tv-fbx-loader', FBXLoader)
     app.component('tv-obj-loader', OBJLoader)
+    app.component('tv-bloom', Bloom)
   }
 }
 
 // class
-export { SkyBox, Popup, ME }
+export { SkyBox, Popup, ME, WaveCircleMesh }
 
 // function
 export * from './utils/ModelLoader'
+
+// enum
+export { AxisType } from './enums/AxisType'
