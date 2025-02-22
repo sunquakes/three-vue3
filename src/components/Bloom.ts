@@ -32,13 +32,23 @@ export default defineComponent({
         )
         composer.addPass(bloomPass)
 
-        sceneSlotProps?.addBeforeFrame?.(
-          (renderer: THREE.WebGLRenderer, scene: THREE.Scene, components: SceneComponents) => {
-            renderer.clear()
-            components.camera.layers.set(props.layer)
-            composer?.render()
-          }
-        )
+        if (props.layer === 0) {
+          sceneSlotProps?.setFrame?.(
+            (renderer: THREE.WebGLRenderer, scene: THREE.Scene, components: SceneComponents) => {
+              renderer.clear()
+              components.camera.layers.set(props.layer)
+              composer?.render()
+            }
+          )
+        } else {
+          sceneSlotProps?.addBeforeFrame?.(
+            (renderer: THREE.WebGLRenderer, scene: THREE.Scene, components: SceneComponents) => {
+              renderer.clear()
+              components.camera.layers.set(props.layer)
+              composer?.render()
+            }
+          )
+        }
       }
     }
   },

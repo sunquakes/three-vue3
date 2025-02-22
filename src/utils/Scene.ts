@@ -6,6 +6,7 @@ export default function (
   renderer: THREE.WebGLRenderer,
   container: HTMLElement,
   components: SceneComponents,
+  frame: CallbackFrame,
   beforeFrame?: CallbackFrame,
   afterFrame?: CallbackFrame
 ): THREE.Scene {
@@ -28,10 +29,7 @@ export default function (
     if (components.controls instanceof OrbitControls) {
       components.controls.update()
     }
-    renderer.clearDepth()
-    // renderer.clear(true, true, true);
-    camera.layers.set(0)
-    renderer.render(scene, camera)
+    frame(renderer, scene, components)
     css2DRenderer.render(scene, camera)
     afterFrame?.(renderer, scene, components)
     requestAnimationFrame(animate)

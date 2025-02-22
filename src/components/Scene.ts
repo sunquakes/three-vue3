@@ -18,6 +18,7 @@ export default defineComponent({
     'update:controls',
     'created',
     'beforeFrame',
+    'frame',
     'afterFrame'
   ],
   setup(props, { emit }) {
@@ -30,6 +31,20 @@ export default defineComponent({
     const sceneSlotProps: SceneSlotProps = {}
     provide('sceneSlotProps', sceneSlotProps)
 
+    let callbackFrame: CallbackFrame = (
+      renderer: THREE.WebGLRenderer,
+      scene: THREE.Scene,
+      components: SceneComponents
+    ) => {
+      const camera = components.camera
+      renderer.clearDepth()
+      camera.layers.set(0)
+      renderer.render(scene, camera)
+    }
+
+    function frame(renderer: THREE.WebGLRenderer, scene: THREE.Scene, components: SceneComponents) {
+      callbackFrame(renderer, scene, components)
+    }
     function beforeFrame(
       renderer: THREE.WebGLRenderer,
       scene: THREE.Scene,
@@ -50,6 +65,7 @@ export default defineComponent({
         afterFrameChild?.(renderer, scene, components)
       })
     }
+
     return {
       UUID,
       showSlot,
@@ -94,7 +110,7 @@ export default defineComponent({
           axesHelper: axesHelper,
           controls: controls
         }
-        const scene = Scene(renderer, container, sceneComponents, beforeFrame, afterFrame)
+        const scene = Scene(renderer, container, sceneComponents, frame, beforeFrame, afterFrame)
         if (props.bgImage != undefined) {
           const textureLoader = new THREE.TextureLoader()
           const texture = textureLoader.load(props.bgImage)
@@ -110,6 +126,9 @@ export default defineComponent({
           renderer: renderer,
           scene: scene,
           sceneComponents: sceneComponents,
+          setFrame: (callback: CallbackFrame) => {
+            callbackFrame = callback
+          },
           addBeforeFrame: (callback: CallbackFrame) => {
             beforeFrameChildren.push(callback)
           },

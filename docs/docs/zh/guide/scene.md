@@ -81,7 +81,7 @@ title: 场景
 
 ## 属性
 
-| 名称               | 类型                        | 默认值                  | Description                                                       |
+| 名称               | 类型                        | 默认值                  | 描述                                                              |
 | ------------------ | --------------------------- | ----------------------- | ----------------------------------------------------------------- |
 | v-model            | THREE.Scene                 | THREE.Scene             | `可选` 组件挂载后，值将是从 undefined 变为 THREE.Scene 实例。     |
 | v-model:renderer   | THREE.WebGLRenderer         | THREE.WebGLRenderer     | `可选`                                                            |

@@ -7,7 +7,7 @@ title: 波动圆
 Class
 :::
 
-## Default Usage
+## 默认用法
 
 <WaveCircleMesh />
 

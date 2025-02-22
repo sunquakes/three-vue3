@@ -17,6 +17,7 @@ declare global {
     renderer?: THREE.WebGLRenderer
     scene?: THREE.Scene
     sceneComponents?: SceneComponents
+    setFrame?: (callback: CallbackFrame) => void
     addBeforeFrame?: (callback: CallbackFrame) => void
     addAfterFrame?: (callback: CallbackFrame) => void
   }

@@ -1,17 +1,17 @@
 ---
-lang: en-US
-title: Bloom
+lang: zh-CN
+title: 泛光
 ---
 
 ::: tip type
 Component
 :::
 
-## Default Usage
+## 默认用法
 
 <Bloom />
 
-::: details Click me to view the codes
+::: details 点击我查看代码
 
 ```vue
 <template>
@@ -31,13 +31,13 @@ const created = async (scene, { camera }) => {
   const cube0 = new THREE.Mesh(geometry, material)
   cube0.position.set(0.5, 0, 0)
   cube0.layers.set(0)
-  // Load cube to scene.
+  // 添加方块到场景中。
   scene.add(cube0)
 
   const cube1 = new THREE.Mesh(geometry, material)
   cube1.position.set(-0.5, 0, 0)
   cube1.layers.set(1)
-  // Load cube to scene.
+  // 添加方块到场景中。
   scene.add(cube1)
 }
 </script>
@@ -53,11 +53,11 @@ const created = async (scene, { camera }) => {
 
 :::
 
-## Props
+## 属性
 
-| Name      | Type   | Default | Description                                   |
-| --------- | ------ | ------- | --------------------------------------------- |
-| layer     | number | 0       | `optional` The layer of the bloom effect.     |
-| strength  | number | 1       | `optional` The strength of the bloom effect.  |
-| radius    | number | 0.5     | `optional` The radius of the bloom effect.    |
-| threshold | number | 0.5     | `optional` The threshold of the bloom effect. |
+| 名称      | 类型   | 默认值 | 描述                  |
+| --------- | ------ | ------ | --------------------- |
+| layer     | number | 0      | `可选` 泛光所在的层。 |
+| strength  | number | 1      | `可选` 泛光强度。     |
+| radius    | number | 0.5    | `可选` 泛光半径。     |
+| threshold | number | 0.5    | `可选` 泛光阈值。     |

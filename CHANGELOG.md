@@ -3,6 +3,7 @@
 ### Add
 
 - Add WaveCircleMesh.
+- Add Bloom effect.
 
 ---
 
