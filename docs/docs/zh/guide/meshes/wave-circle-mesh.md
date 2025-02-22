@@ -79,6 +79,8 @@ const created = (scene, { camera }) => {
 </style>
 ```
 
+:::
+
 ## 构造函数参数
 
 | 参数    | 属性         | 类型                             | 默认值               | 描述                                                                |
