@@ -18,14 +18,14 @@ Component
 ```vue
 <template>
   <tv-scene class="scene" @created="created">
-    <tv-gltf-loader v-model="gltfUrl"></tv-gltf-loader>
+    <tv-gltf-loader v-model="gltfUrl" :scale="[0.5, 0.5, 0.5]"></tv-gltf-loader>
   </tv-scene>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-const gltfUrl = ref('/models/girl.glb')
+const gltfUrl = ref('/models/perseverance.glb')
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
@@ -54,14 +54,14 @@ const created = (scene, { camera }) => {
 ```vue
 <template>
   <tv-scene class="scene" @created="created">
-    <tv-fbx-loader v-model="fbxUrl"></tv-fbx-loader>
+    <tv-fbx-loader v-model="fbxUrl" :scale="[0.5, 0.5, 0.5]"></tv-fbx-loader>
   </tv-scene>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-const fbxUrl = ref('/models/girl.fbx')
+const fbxUrl = ref('/models/perseverance.fbx')
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
@@ -90,15 +90,15 @@ const created = (scene, { camera }) => {
 ```vue
 <template>
   <tv-scene class="scene" @created="created">
-    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl"></tv-obj-loader>
+    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scale="[0.5, 0.5, 0.5]"></tv-obj-loader>
   </tv-scene>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-const objUrl = ref('/models/obj/girl.obj')
-const mtlUrl = ref('/models/obj/girl.mtl')
+const objUrl = ref('/models/obj/perseverance.obj')
+const mtlUrl = ref('/models/obj/perseverance.mtl')
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
@@ -112,19 +112,19 @@ const created = (scene, { camera }) => {
   height: 300px;
 }
 </style>
-
 ```
 
 :::
 
 ## Props
 
-| Name    | Type        | Default     | Description                                            |
-| ------- | ----------- | ----------- | ------------------------------------------------------ |
-| v-model | string      | string      | `required` The model url.                              |
-| scene   | THREE.Scene | THREE.Scene | `required` The Scene where the model will be rendered. |
-| cache   | boolean     | true        | `optional` The model will be cached into the indexDB.  |
-| mtl     | string      |             | `optional` When using OBJLoader, the mtl file url.     |
+| Name    | Type                     | Default         | Description                                            |
+| ------- | ------------------------ | --------------- | ------------------------------------------------------ |
+| v-model | string                   | string          | `required` The model url.                              |
+| scene   | THREE.Scene              | THREE.Scene     | `required` The Scene where the model will be rendered. |
+| scale   | [number, number, number] | [1.0, 1.0, 1.0] | `optional` The scale of the model.                     |
+| cache   | boolean                  | true            | `optional` The model will be cached into the indexDB.  |
+| mtl     | string                   |                 | `optional` When using OBJLoader, the mtl file url.     |
 
 ## Methods
 

@@ -25,7 +25,7 @@ const created = async (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
 
   // 加载模型到场景中。
-  const model = await GLTFLoader('/models/girl.glb', true)
+  const model = await GLTFLoader('/models/satellite.glb', true)
   scene.add(model)
 
   // 创建动态元素。

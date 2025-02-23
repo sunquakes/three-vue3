@@ -9,7 +9,8 @@ const created = async (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
 
   // Load model to scene.
-  const model = await FBXLoader('/models/girl.fbx')
+  const model = await FBXLoader('/models/perseverance.fbx')
+  model.scale.set(0.5, 0.5, 0.5)
   scene.add(model)
 }
 </script>

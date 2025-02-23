@@ -11,6 +11,7 @@ export default defineComponent({
         const model = await OBJLoader(props.modelValue, props.mtl, props.cache, (event) =>
           emit('onProgress', event)
         )
+        model.scale.set(...props.scale)
         scene.add(model)
         emit('loaded', model)
       }
@@ -31,6 +32,10 @@ export default defineComponent({
     scene: {
       type: Object as PropType<THREE.Scene>,
       required: true
+    },
+    scale: {
+      type: Object as PropType<[number, number, number]>,
+      default: () => [1, 1, 1]
     },
     cache: {
       type: Boolean,

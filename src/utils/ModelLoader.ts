@@ -5,7 +5,7 @@ import { OBJLoader as THREEOBJLoader } from 'three/examples/jsm/loaders/OBJLoade
 import { MTLLoader as THREEMTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js'
 
 const OBJECT_STORE = 'THREE_VUE_OBJECT_STORE'
-const DB_NAME = 'GLBDB'
+const DB_NAME = 'THREE_VUE_OBJECT_DB'
 
 export default function fileLoader(
   url: string,
