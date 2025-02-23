@@ -25,7 +25,8 @@ const created = async (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
 
   // 加载模型到场景中。
-  const model = await GLTFLoader('/models/satellite.glb', true)
+  const model = await GLTFLoader('/models/perseverance.glb', true)
+  model.scale.set(0.5, 0.5, 0.5)
   scene.add(model)
 
   // 创建动态元素。
