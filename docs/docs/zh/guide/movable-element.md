@@ -56,6 +56,6 @@ const created = async (scene, { camera }) => {
 
 ## 方法
 
-| 名称        | 参数                                                             | 描述                                    |
-| ----------- | ---------------------------------------------------------------- | --------------------------------------- |
-| constructor | (model: THREE.Group, position: [number, number, number]) => void | `model`操作的模型；`position`初始位置。 |
+| 名称        | 参数                                                             | 描述                                      |
+| ----------- | ---------------------------------------------------------------- | ----------------------------------------- |
+| constructor | (model: THREE.Group, position: [number, number, number]) => void | `model` 操作的模型；`position` 初始位置。 |
