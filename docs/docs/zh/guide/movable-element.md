@@ -26,7 +26,7 @@ const created = async (scene, { camera }) => {
 
   // 加载模型到场景中。
   const model = await GLTFLoader('/models/perseverance.glb', true)
-  model.scale.set(0.5, 0.5, 0.5)
+  model.scale.set(0.8, 0.8, 0.8)
   scene.add(model)
 
   // 创建动态元素。

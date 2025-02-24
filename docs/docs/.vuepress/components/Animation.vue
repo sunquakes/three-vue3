@@ -1,17 +1,21 @@
 <template>
-  <tv-scene class="scene" @created="created"></tv-scene>
+  <tv-scene class="scene" bg-color="#FAEBD7" @created="created"></tv-scene>
 </template>
 
 <script lang="ts" setup>
-import { GLTFLoader } from 'three-vue3'
+import { GLTFLoader, Animation } from 'three-vue3'
 
 const created = async (scene, { camera }) => {
+  scene.position.set(0, -0.5, 0)
   camera.position.set(0, 1.5, 3)
 
   // Load model to scene.
   const model = await GLTFLoader('/models/perseverance.glb')
-  model.scale.set(0.8, 0.8, 0.8)
   scene.add(model)
+
+  // Play animation.
+  const animation = new Animation(model)
+  animation.playAll()
 }
 </script>
 

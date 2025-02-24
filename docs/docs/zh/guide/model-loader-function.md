@@ -28,7 +28,7 @@ const created = async (scene, { camera }) => {
 
   // 加载模型到场景中。
   const model = await GLTFLoader('/models/perseverance.glb')
-  model.scale.set(0.5, 0.5, 0.5)
+  model.scale.set(0.8, 0.8, 0.8)
   scene.add(model)
 }
 </script>
@@ -65,7 +65,7 @@ const created = async (scene, { camera }) => {
 
   // 加载模型到场景中。
   const model = await FBXLoader('/models/perseverance.fbx')
-  model.scale.set(0.5, 0.5, 0.5)
+  model.scale.set(0.8, 0.8, 0.8)
   scene.add(model)
 }
 </script>
@@ -102,7 +102,7 @@ const created = async (scene, { camera }) => {
 
   // 加载模型到场景中。
   const model = await OBJLoader('/models/obj/perseverance.obj', '/models/obj/perseverance.mtl')
-  model.scale.set(0.5, 0.5, 0.5)
+  model.scale.set(0.8, 0.8, 0.8)
   scene.add(model)
 }
 </script>
@@ -118,7 +118,7 @@ const created = async (scene, { camera }) => {
 
 ::::
 
-## Parametersa
+## 参数
 
 | 名称       | 类型     | 默认值 | 描述                                                                                |
 | ---------- | -------- | ------ | ----------------------------------------------------------------------------------- |

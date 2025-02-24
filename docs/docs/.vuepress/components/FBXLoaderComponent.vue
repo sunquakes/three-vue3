@@ -1,6 +1,6 @@
 <template>
   <tv-scene class="scene" @created="created">
-    <tv-fbx-loader v-model="fbxUrl" :scale="[0.5, 0.5, 0.5]"></tv-fbx-loader>
+    <tv-fbx-loader v-model="fbxUrl" :scale="[0.8, 0.8, 0.8]"></tv-fbx-loader>
   </tv-scene>
 </template>
 

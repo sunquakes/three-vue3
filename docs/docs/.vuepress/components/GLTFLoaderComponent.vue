@@ -1,6 +1,6 @@
 <template>
   <tv-scene class="scene" @created="created">
-    <tv-gltf-loader v-model="gltfUrl" :scale="[0.5, 0.5, 0.5]"></tv-gltf-loader>
+    <tv-gltf-loader v-model="gltfUrl" :scale="[0.8, 0.8, 0.8]"></tv-gltf-loader>
   </tv-scene>
 </template>
 

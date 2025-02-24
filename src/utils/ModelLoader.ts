@@ -173,6 +173,7 @@ export async function GLTFLoader(
     onProgress?.({ type: 'parse', progress: 0 })
     loader.parse(data, '', (gltf) => {
       const model = gltf.scene
+      model.animations = gltf.animations
       onProgress?.({ type: 'parse', progress: 100 })
       resolve(model)
     })

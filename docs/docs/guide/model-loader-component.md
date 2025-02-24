@@ -18,7 +18,7 @@ Component
 ```vue
 <template>
   <tv-scene class="scene" @created="created">
-    <tv-gltf-loader v-model="gltfUrl" :scale="[0.5, 0.5, 0.5]"></tv-gltf-loader>
+    <tv-gltf-loader v-model="gltfUrl" :scale="[0.8, 0.8, 0.8]"></tv-gltf-loader>
   </tv-scene>
 </template>
 
@@ -54,7 +54,7 @@ const created = (scene, { camera }) => {
 ```vue
 <template>
   <tv-scene class="scene" @created="created">
-    <tv-fbx-loader v-model="fbxUrl" :scale="[0.5, 0.5, 0.5]"></tv-fbx-loader>
+    <tv-fbx-loader v-model="fbxUrl" :scale="[0.8, 0.8, 0.8]"></tv-fbx-loader>
   </tv-scene>
 </template>
 
@@ -90,7 +90,7 @@ const created = (scene, { camera }) => {
 ```vue
 <template>
   <tv-scene class="scene" @created="created">
-    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scale="[0.5, 0.5, 0.5]"></tv-obj-loader>
+    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scale="[0.8, 0.8, 0.8]"></tv-obj-loader>
   </tv-scene>
 </template>
 

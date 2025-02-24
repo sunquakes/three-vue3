@@ -10,6 +10,7 @@ export default function (options) {
     },
     'popup',
     'movable-element',
+    'animation',
     {
       text: options.meshText,
       collapsible: true,

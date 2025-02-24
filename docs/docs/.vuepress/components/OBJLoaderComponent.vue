@@ -1,6 +1,6 @@
 <template>
   <tv-scene class="scene" @created="created">
-    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scale="[0.5, 0.5, 0.5]"></tv-obj-loader>
+    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scale="[0.8, 0.8, 0.8]"></tv-obj-loader>
   </tv-scene>
 </template>
 

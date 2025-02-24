@@ -8,6 +8,7 @@ import Popup from './utils/Popup'
 import ME from './utils/ME'
 import WaveCircleMesh from './meshes/WaveCircleMesh'
 import Bloom from './components/Bloom'
+import Animation from './utils/Animation'
 
 // component
 export default {
@@ -21,7 +22,7 @@ export default {
 }
 
 // class
-export { SkyBox, Popup, ME, WaveCircleMesh }
+export { SkyBox, Popup, ME, WaveCircleMesh, Animation }
 
 // function
 export * from './utils/ModelLoader'

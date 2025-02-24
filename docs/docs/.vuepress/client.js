@@ -15,6 +15,7 @@ import MovableElement from './components/MovableElement.vue'
 import WaveCircleMesh from './components/meshes/WaveCircleMesh.vue'
 import WaveCircleMeshOptions from './components/meshes/WaveCircleMeshOptions.vue'
 import Bloom from './components/effects/Bloom.vue'
+import Animation from './components/Animation.vue'
 
 export default defineClientConfig({
   enhance({ app }) {
@@ -34,5 +35,6 @@ export default defineClientConfig({
     app.component('WaveCircleMesh', WaveCircleMesh)
     app.component('WaveCircleMeshOptions', WaveCircleMeshOptions)
     app.component('Bloom', Bloom)
+    app.component('Animation', Animation)
   }
 })
