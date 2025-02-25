@@ -7,8 +7,6 @@ import dts from 'vite-plugin-dts'
 
 import { resolve } from 'path'
 
-const CESIUM_BASE_URL = 'cesium/'
-
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
@@ -19,13 +17,12 @@ export default defineConfig({
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled
       // into your library
-      external: ['vue'],
+      external: ['vue', 'three'],
       output: {
         // Provide global variables to use in the UMD build
         // for externalized deps
         globals: {
-          vue: 'Vue',
-          cesium: 'Cesium'
+          vue: 'Vue'
         }
       }
     }
@@ -43,8 +40,5 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  },
-  define: {
-    CESIUM_BASE_URL: JSON.stringify(CESIUM_BASE_URL)
   }
 })
