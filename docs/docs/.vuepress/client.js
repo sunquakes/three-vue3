@@ -17,6 +17,7 @@ import WaveCircleMeshOptions from './components/meshes/WaveCircleMeshOptions.vue
 import Bloom from './components/effects/Bloom.vue'
 import Animation from './components/Animation.vue'
 import Index from './components/Index.vue'
+import IndexAnimation from './components/IndexAnimation.vue'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/reset.css'
 
@@ -41,5 +42,6 @@ export default defineClientConfig({
     app.component('Bloom', Bloom)
     app.component('Animation', Animation)
     app.component('Index', Index)
+    app.component('IndexAnimation', IndexAnimation)
   }
 })

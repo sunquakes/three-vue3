@@ -1,6 +1,5 @@
-```vue:no-line-numbers
 <template>
-  <tv-scene class="scene" bg-color="#FAEBD7" @created="created" />
+  <tv-scene class="scene" bg-color="#FAEBD7" @created="created" :axes-helper="false"></tv-scene>
 </template>
 
 <script lang="ts" setup>
@@ -24,7 +23,6 @@ const created = async (scene, { camera }) => {
 .scene {
   margin-top: 10px;
   width: 100%;
-  height: 300px;
+  height: 225px;
 }
 </style>
-```

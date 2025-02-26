@@ -1,15 +1,24 @@
 <template>
-  <a-row class="index-container" :gutter="16">
+  <a-row class="index-container" :gutter="30">
     <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-      <Animation />
+      <IndexAnimation />
     </a-col>
     <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-      <Content path="/animation.md" />
+      <Content class="index-content" :path="path" />
     </a-col>
   </a-row>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { defineProps } from 'vue'
+
+defineProps({
+  path: {
+    type: String,
+    required: true
+  }
+})
+</script>
 
 <style scoped>
 .index-container {
@@ -26,5 +35,9 @@
 
 ::v-deep .language-vue pre * {
   scrollbar-width: none;
+}
+
+.index-content {
+  margin-top: -65px;
 }
 </style>

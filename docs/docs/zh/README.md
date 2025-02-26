@@ -17,4 +17,4 @@ footer: Apache-2.0 license | Copyright © 2025-present Shing Rui
 
 ---
 
-<Index />
+<Index path="/zh/quick-start.md" />
