@@ -1,14 +1,18 @@
 ## [0.0.6] - 2025-02-24
 
-### Add
+### Added
 
 - Add Animation.
+
+### Modified
+
+- Modified the example model.
 
 ---
 
 ## [0.0.5] - 2025-02-15
 
-### Add
+### Added
 
 - Add WaveCircleMesh.
 - Add Bloom effect.
@@ -17,7 +21,7 @@
 
 ## [0.0.4] - 2025-02-14
 
-### Add
+### Added
 
 - Add FBX model loader.
 - Add OBJ model loader.
@@ -27,7 +31,7 @@
 
 ## [0.0.3] - 2025-02-12
 
-### Add
+### Added
 
 - Add components prefix.
 - Add scene clear color.
