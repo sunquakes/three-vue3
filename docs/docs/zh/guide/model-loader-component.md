@@ -17,16 +17,15 @@ title: 组件加载器
 
 ```vue
 <template>
-  <tv-scene class="scene" v-model="sceneValue" @created="created">
-    <tv-gltf-loader v-model="gltfUrl" :scene="sceneValue"></tv-gltf-loader>
+  <tv-scene class="scene" @created="created">
+    <tv-gltf-loader v-model="gltfUrl" :scale="[0.8, 0.8, 0.8]"></tv-gltf-loader>
   </tv-scene>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-const gltfUrl = ref('/models/girl.glb')
-const sceneValue = ref(null)
+const gltfUrl = ref('/models/perseverance.glb')
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
@@ -54,16 +53,15 @@ const created = (scene, { camera }) => {
 
 ```vue
 <template>
-  <tv-scene class="scene" v-model="sceneValue" @created="created">
-    <tv-fbx-loader v-model="fbxUrl" :scene="sceneValue"></tv-fbx-loader>
+  <tv-scene class="scene" @created="created">
+    <tv-fbx-loader v-model="fbxUrl" :scale="[0.8, 0.8, 0.8]"></tv-fbx-loader>
   </tv-scene>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-const fbxUrl = ref('/models/girl.fbx')
-const sceneValue = ref(null)
+const fbxUrl = ref('/models/perseverance.fbx')
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
@@ -91,17 +89,16 @@ const created = (scene, { camera }) => {
 
 ```vue
 <template>
-  <tv-scene class="scene" v-model="sceneValue" @created="created">
-    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scene="sceneValue"></tv-obj-loader>
+  <tv-scene class="scene" @created="created">
+    <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scale="[0.8, 0.8, 0.8]"></tv-obj-loader>
   </tv-scene>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-const objUrl = ref('/models/obj/girl.obj')
-const mtlUrl = ref('/models/obj/girl.mtl')
-const sceneValue = ref(null)
+const objUrl = ref('/models/obj/perseverance.obj')
+const mtlUrl = ref('/models/obj/perseverance.mtl')
 
 const created = (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
@@ -121,12 +118,13 @@ const created = (scene, { camera }) => {
 
 ## 属性
 
-| 名称    | 类型        | 默认值      | 描述                                                |
-| ------- | ----------- | ----------- | --------------------------------------------------- |
-| v-model | string      | string      | `必需` 模型的 URL。                                 |
-| scene   | THREE.Scene | THREE.Scene | `必需` 渲染模型的场景。                             |
-| cache   | boolean     | true        | `可选` 是否将模型缓存到 IndexedDB 中。默认为 true。 |
-| mtl     | string      |             | `可选` 当使用 `OBJLoader` 时, `mtl` 文件的URL。     |
+| 名称    | 类型                     | 默认值          | 描述                                                |
+| ------- | ------------------------ | --------------- | --------------------------------------------------- |
+| v-model | string                   | string          | `必需` 模型的 URL。                                 |
+| scene   | THREE.Scene              | THREE.Scene     | `必需` 渲染模型的场景。                             |
+| scale   | [number, number, number] | [1.0, 1.0, 1.0] | `可选` 模型的缩放比例。                             |
+| cache   | boolean                  | true            | `可选` 是否将模型缓存到 IndexedDB 中。默认为 true。 |
+| mtl     | string                   |                 | `可选` 当使用 `OBJLoader` 时, `mtl` 文件的URL。     |
 
 ## 方法
 

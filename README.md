@@ -8,7 +8,7 @@ English | [🇨🇳中文](https://github.com/sunquakes/three-vue3/blob/main/REA
   </a>
 </p>
 <p align="center">
-  <img src="https://img.shields.io/badge/node-%3E=22.13.0-brightgreen.svg?maxAge=2592000" alt="Node">
+  <img src="https://img.shields.io/badge/node-%3E=18.20.6-brightgreen.svg?maxAge=2592000" alt="Node">
   <img alt="GitHub" src="https://img.shields.io/github/license/sunquakes/three-vue3?color=blue">
   <img alt="three-vue3" src="https://img.shields.io/github/v/release/sunquakes/three-vue3">
 </p>

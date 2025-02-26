@@ -9,7 +9,8 @@ const created = async (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
 
   // Load model to scene.
-  const model = await GLTFLoader('/models/girl.glb')
+  const model = await GLTFLoader('/models/perseverance.glb')
+  model.scale.set(0.8, 0.8, 0.8)
   scene.add(model)
 }
 </script>

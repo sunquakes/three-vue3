@@ -15,10 +15,16 @@ import MovableElement from './components/MovableElement.vue'
 import WaveCircleMesh from './components/meshes/WaveCircleMesh.vue'
 import WaveCircleMeshOptions from './components/meshes/WaveCircleMeshOptions.vue'
 import Bloom from './components/effects/Bloom.vue'
+import Animation from './components/Animation.vue'
+import Index from './components/Index.vue'
+import IndexAnimation from './components/IndexAnimation.vue'
+import Antd from 'ant-design-vue'
+import 'ant-design-vue/dist/reset.css'
 
 export default defineClientConfig({
   enhance({ app }) {
     app.use(ThreeVue3)
+    app.use(Antd)
     app.component('Scene', Scene)
     app.component('SceneBgImage', SceneBgImage)
     app.component('SceneBgColor', SceneBgColor)
@@ -34,5 +40,8 @@ export default defineClientConfig({
     app.component('WaveCircleMesh', WaveCircleMesh)
     app.component('WaveCircleMeshOptions', WaveCircleMeshOptions)
     app.component('Bloom', Bloom)
+    app.component('Animation', Animation)
+    app.component('Index', Index)
+    app.component('IndexAnimation', IndexAnimation)
   }
 })
