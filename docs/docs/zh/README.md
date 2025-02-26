@@ -19,8 +19,10 @@ footer: Apache-2.0 license | Copyright © 2025-present Shing Rui
 
 <Index path="/zh/quick-start.md" />
 
-## 贡献者 
+## 贡献者
 
 <br />
 
 [![ Contributors](https://contrib.rocks/image?repo=sunquakes/three-vue3)](https://github.com/sunquakes/three-vue3/graphs/contributors)
+
+<br />
