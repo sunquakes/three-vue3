@@ -1,0 +1,70 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Project",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["build"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "Execute pnpm build in project root directory"
+    },
+    {
+      "label": "Clean Docs node_modules",
+      "type": "shell",
+      "command": "Remove-Item",
+      "args": ["-Recurse", "-Force", "${workspaceFolder}/docs/node_modules"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "Delete docs/node_modules directory"
+    },
+    {
+      "label": "Install Docs Dependencies",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["install"],
+      "options": {
+        "cwd": "${workspaceFolder}/docs"
+      },
+      "problemMatcher": [],
+      "detail": "Execute pnpm install in docs directory"
+    },
+    {
+      "label": "Start Docs Dev Server",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["docs:dev"],
+      "options": {
+        "cwd": "${workspaceFolder}/docs"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "detail": "Start documentation development server in docs directory"
+    },
+    {
+      "label": "Build and Start Docs",
+      "dependsOn": [
+        "Build Project",
+        "Clean Docs node_modules",
+        "Install Docs Dependencies",
+        "Start Docs Dev Server"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Complete workflow: Build project -> Clean docs/node_modules -> Install dependencies -> Start docs dev server"
+    }
+  ]
+}
