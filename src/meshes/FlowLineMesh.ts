@@ -1,73 +1,42 @@
 import * as THREE from 'three'
 import { AxisType } from '../enums/AxisType'
 
-function createArrowTexture(): THREE.CanvasTexture {
+function createArrowTexture(arrowColor: [number, number, number]): THREE.CanvasTexture {
   const canvas = document.createElement('canvas')
   canvas.width = 512
-  canvas.height = 64
+  canvas.height = 128
   
   const ctx = canvas.getContext('2d')
   if (!ctx) return new THREE.CanvasTexture(canvas)
   
-  // 半透明黑色背景
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  // Fully transparent background
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
   
-  const arrowWidth = 40
-  const arrowHeight = 30
-  const spacing = 60
-  const lineWidth = 3
+  const arrowWidth = 80
+  const arrowHeight = 50
+  const spacing = 100
+  const lineWidth = 12
   
-  // 绘制多个箭头
-  for (let x = 10; x < canvas.width; x += spacing) {
-    // 外发光效果
-    ctx.shadowColor = '#00ffff'
-    ctx.shadowBlur = 15
-    ctx.strokeStyle = '#00ffff'
+  // Draw multiple V-shaped arrows (pointing up)
+  for (let x = 20; x < canvas.width; x += spacing) {
+    const r = Math.round(arrowColor[0] * 255)
+    const g = Math.round(arrowColor[1] * 255)
+    const b = Math.round(arrowColor[2] * 255)
+    
+    // Fill arrow with solid color
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`
+    ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`
     ctx.lineWidth = lineWidth
-    ctx.lineJoin = 'round'
     ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
     
-    // 绘制空心箭头轮廓（箭头朝右）
+    // Draw V-shaped arrow (pointing up)
     ctx.beginPath()
-    // 从箭头尾部左上角开始
-    ctx.moveTo(x, 32 - arrowHeight / 2)
-    // 上边线
-    ctx.lineTo(x + arrowWidth - arrowHeight, 32 - arrowHeight / 2)
-    // 上斜边
-    ctx.lineTo(x + arrowWidth - arrowHeight, 32 - arrowHeight)
-    // 箭头尖端
-    ctx.lineTo(x + arrowWidth, 32)
-    // 下斜边
-    ctx.lineTo(x + arrowWidth - arrowHeight, 32 + arrowHeight)
-    // 下边线
-    ctx.lineTo(x + arrowWidth - arrowHeight, 32 + arrowHeight / 2)
-    // 尾部
-    ctx.lineTo(x, 32 + arrowHeight / 2)
-    ctx.closePath()
+    ctx.moveTo(x, 64 + arrowHeight / 2)
+    ctx.lineTo(x + arrowWidth / 2, 64 - arrowHeight / 2)
+    ctx.lineTo(x + arrowWidth, 64 + arrowHeight / 2)
     ctx.stroke()
-    
-    // 内部填充半透明
-    ctx.shadowBlur = 0
-    ctx.fillStyle = 'rgba(0, 255, 255, 0.2)'
-    ctx.fill()
   }
-  
-  // 添加上下边框发光线
-  ctx.shadowColor = '#0088ff'
-  ctx.shadowBlur = 10
-  ctx.strokeStyle = 'rgba(0, 136, 255, 0.5)'
-  ctx.lineWidth = 2
-  
-  ctx.beginPath()
-  ctx.moveTo(0, 6)
-  ctx.lineTo(canvas.width, 6)
-  ctx.stroke()
-  
-  ctx.beginPath()
-  ctx.moveTo(0, canvas.height - 6)
-  ctx.lineTo(canvas.width, canvas.height - 6)
-  ctx.stroke()
   
   const texture = new THREE.CanvasTexture(canvas)
   texture.wrapS = THREE.RepeatWrapping
@@ -120,7 +89,7 @@ function createLineGeometry(
       point.x + offset.x, point.y + offset.y, point.z + offset.z
     )
     
-    // UV 的 X 方向沿线的长度方向，这样纹理会沿线流动
+    // UV X direction follows the line length direction, so texture flows along the line
     const uvX = lengths[i] / totalLength
     uvs.push(uvX, 0, uvX, 1)
     
@@ -138,26 +107,72 @@ function createLineGeometry(
   return { geometry, totalLength }
 }
 
-function getLineMaterial(color?: Array4, textureRepeat?: number): { material: THREE.MeshBasicMaterial; texture: THREE.Texture } {
-  const arrowTexture = createArrowTexture()
+function getLineMaterial(
+  color: [number, number, number, number],
+  arrowColor: [number, number, number],
+  textureRepeat?: number
+): { material: THREE.ShaderMaterial; texture: THREE.Texture } {
+  const arrowTexture = createArrowTexture(arrowColor)
   
-  const material = new THREE.MeshBasicMaterial({
+  const material = new THREE.ShaderMaterial({
     transparent: true,
-    opacity: 1,
     depthWrite: false,
     side: THREE.DoubleSide,
-    map: arrowTexture
+    uniforms: {
+      time: { value: 0 },
+      lineColor: { value: color },
+      arrowColor: { value: arrowColor },
+      arrowTexture: { value: arrowTexture },
+      textureRepeat: { value: textureRepeat ?? 10 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec4 lineColor;
+      uniform vec3 arrowColor;
+      uniform sampler2D arrowTexture;
+      uniform float textureRepeat;
+      varying vec2 vUv;
+      
+      void main() {
+        vec2 uv = vUv;
+        // Flow along X direction
+        uv.x = fract(uv.x * textureRepeat + time);
+        
+        vec4 texColor = texture2D(arrowTexture, uv);
+        
+        // Calculate gradient from center to edges (Y direction) - glow effect
+        float centerDist = abs(vUv.y - 0.5) * 2.0;
+        float alpha = 1.0 - centerDist;
+        
+        // Background color gradient transparency
+        float bgAlpha = (1.0 - centerDist) * lineColor.a;
+        
+        // Arrow brightness (use max channel as brightness)
+        float arrowBrightness = max(max(texColor.r, texColor.g), texColor.b);
+        
+        // Mix background and arrows
+        vec3 bgColor = lineColor.rgb;
+        vec3 finalColor = mix(bgColor, arrowColor, arrowBrightness);
+        float finalAlpha = max(bgAlpha, alpha * arrowBrightness);
+        
+        gl_FragColor = vec4(finalColor, finalAlpha);
+      }
+    `
   })
-  
-  if (textureRepeat !== undefined) {
-    arrowTexture.repeat.set(textureRepeat, 1)
-  }
   
   return { material, texture: arrowTexture }
 }
 
 export default class FlowLineMesh extends THREE.Mesh {
-  private texture!: THREE.Texture
+  private flowMaterial!: THREE.ShaderMaterial
   private speed: number = 1
   private startTime: number = Date.now()
 
@@ -168,15 +183,16 @@ export default class FlowLineMesh extends THREE.Mesh {
       new THREE.Vector3(1, 0, 0)
     ]
     const width = options.width ?? 0.05
-    const color = options.color ?? [0.0, 0.8, 1.0, 1]
+    const color = options.color ?? [0, 0.5, 1, 0.5]
+    const arrowColor = options.arrowColor ?? [1, 1, 1]
     const axis = options.axis ?? AxisType.Z
     const textureRepeat = options.textureRepeat ?? 20
-    const speed = options.speed ?? 1
+    const speed = options.speed ?? 0.3
     
     const { geometry } = createLineGeometry(points, width, axis)
-    const { material, texture } = getLineMaterial(color, textureRepeat)
+    const { material, texture } = getLineMaterial(color, arrowColor, textureRepeat)
     super(geometry, material)
-    this.texture = texture
+    this.flowMaterial = material as THREE.ShaderMaterial
     this.speed = speed
     this.startAnimation()
   }
@@ -185,9 +201,9 @@ export default class FlowLineMesh extends THREE.Mesh {
     this.startTime = Date.now()
     const animate = () => {
       const now = Date.now()
-      const offset = ((now - this.startTime) / 1000) * this.speed
-      // 沿 X 方向（线的长度方向）流动
-      this.texture.offset = new THREE.Vector2(-offset, 0)
+      const time = ((now - this.startTime) / 1000) * this.speed
+      // Update time uniform in shader
+      this.flowMaterial.uniforms.time.value = time
       requestAnimationFrame(animate)
     }
     animate()

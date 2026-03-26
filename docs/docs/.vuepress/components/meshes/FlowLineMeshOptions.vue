@@ -7,22 +7,33 @@ import { FlowLineMesh, AxisType } from 'three-vue3'
 import * as THREE from 'three'
 
 const points = [
-  new THREE.Vector3(-2.5, 0, 0),
-  new THREE.Vector3(-2, 0.4, 0),
-  new THREE.Vector3(-1.5, 0.7, 0),
-  new THREE.Vector3(-1, 0.9, 0),
-  new THREE.Vector3(-0.5, 1, 0),
-  new THREE.Vector3(0, 1, 0),
-  new THREE.Vector3(0.5, 1, 0),
-  new THREE.Vector3(1, 0.9, 0),
-  new THREE.Vector3(1.5, 0.7, 0),
-  new THREE.Vector3(2, 0.4, 0),
-  new THREE.Vector3(2.5, 0, 0)
+  new THREE.Vector3(-3, 0, 0),
+  new THREE.Vector3(-2.7, 0.25, 0),
+  new THREE.Vector3(-2.4, 0.48, 0),
+  new THREE.Vector3(-2.1, 0.68, 0),
+  new THREE.Vector3(-1.8, 0.85, 0),
+  new THREE.Vector3(-1.5, 0.98, 0),
+  new THREE.Vector3(-1.2, 1.05, 0),
+  new THREE.Vector3(-0.9, 1.08, 0),
+  new THREE.Vector3(-0.6, 1.05, 0),
+  new THREE.Vector3(-0.3, 0.98, 0),
+  new THREE.Vector3(0, 0.85, 0),
+  new THREE.Vector3(0.3, 0.68, 0),
+  new THREE.Vector3(0.6, 0.48, 0),
+  new THREE.Vector3(0.9, 0.25, 0),
+  new THREE.Vector3(1.2, 0, 0),
+  new THREE.Vector3(1.5, -0.25, 0),
+  new THREE.Vector3(1.8, -0.48, 0),
+  new THREE.Vector3(2.1, -0.68, 0),
+  new THREE.Vector3(2.4, -0.85, 0),
+  new THREE.Vector3(2.7, -0.98, 0),
+  new THREE.Vector3(3, -1.05, 0)
 ]
 const mesh = new FlowLineMesh({
   points,
-  color: [0.0, 1.0, 1.0, 1],
-  speed: 2,
+  color: [0.0, 0.2, 0.6, 0.8],
+  arrowColor: [1, 1, 1],
+  speed: 0.5,
   width: 0.4,
   axis: AxisType.Z,
   textureRepeat: 10
