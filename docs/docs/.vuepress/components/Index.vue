@@ -10,8 +10,6 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps } from 'vue'
-
 defineProps({
   path: {
     type: String,
@@ -26,15 +24,15 @@ defineProps({
   margin-bottom: 20px;
 }
 
-::v-deep .language-vue pre {
+:deep(.language-vue pre) {
   max-height: 300px !important;
 }
 
-::v-deep .language-vue pre::-webkit-scrollbar {
+:deep(.language-vue pre::-webkit-scrollbar) {
   display: none;
 }
 
-::v-deep .language-vue pre * {
+:deep(.language-vue pre *) {
   scrollbar-width: none;
 }
 

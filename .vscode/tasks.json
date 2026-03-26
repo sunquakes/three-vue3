@@ -15,13 +15,22 @@
     {
       "label": "Clean Docs node_modules",
       "type": "shell",
-      "command": "Remove-Item",
-      "args": ["-Recurse", "-Force", "${workspaceFolder}/docs/node_modules"],
+      "command": "if (Test-Path '${workspaceFolder}\\docs\\node_modules') { Remove-Item '${workspaceFolder}\\docs\\node_modules' -Recurse -Force }",
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [],
       "detail": "Delete docs/node_modules directory"
+    },
+    {
+      "label": "Clean Docs Cache",
+      "type": "shell",
+      "command": "if (Test-Path '${workspaceFolder}\\docs\\docs\\.vuepress\\.cache') { Remove-Item '${workspaceFolder}\\docs\\docs\\.vuepress\\.cache' -Recurse -Force }; if (Test-Path '${workspaceFolder}\\docs\\docs\\.vuepress\\.temp') { Remove-Item '${workspaceFolder}\\docs\\docs\\.vuepress\\.temp' -Recurse -Force }",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "Delete docs/docs/.vuepress/.cache and .temp directories"
     },
     {
       "label": "Install Docs Dependencies",
@@ -35,6 +44,16 @@
       "detail": "Execute pnpm install in docs directory"
     },
     {
+      "label": "Kill Running Dev Server",
+      "type": "shell",
+      "command": "Get-NetTCPConnection -LocalPort 8080,8081 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }; Start-Sleep -Seconds 2; Write-Host 'Dev server stopped. Please manually close the terminal if still running.' -ForegroundColor Yellow",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "Kill running dev server by port to free port"
+    },
+    {
       "label": "Start Docs Dev Server",
       "type": "shell",
       "command": "pnpm",
@@ -46,15 +65,18 @@
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
-        "panel": "new"
+        "panel": "dedicated",
+        "group": "docs"
       },
       "detail": "Start documentation development server in docs directory"
     },
     {
       "label": "Build and Start Docs",
       "dependsOn": [
+        "Kill Running Dev Server",
         "Build Project",
         "Clean Docs node_modules",
+        "Clean Docs Cache",
         "Install Docs Dependencies",
         "Start Docs Dev Server"
       ],
@@ -64,7 +86,7 @@
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Complete workflow: Build project -> Clean docs/node_modules -> Install dependencies -> Start docs dev server"
+      "detail": "Complete workflow: Kill running server -> Build project -> Clean docs/node_modules -> Clean cache -> Install dependencies -> Start docs dev server"
     }
   ]
 }

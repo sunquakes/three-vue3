@@ -7,6 +7,7 @@ import SkyBox from './utils/SkyBox'
 import Popup from './utils/Popup'
 import ME from './utils/ME'
 import WaveCircleMesh from './meshes/WaveCircleMesh'
+import FlowLineMesh from './meshes/FlowLineMesh'
 import Bloom from './components/Bloom'
 import Animation from './utils/Animation'
 
@@ -22,7 +23,7 @@ export default {
 }
 
 // class
-export { SkyBox, Popup, ME, WaveCircleMesh, Animation }
+export { SkyBox, Popup, ME, WaveCircleMesh, FlowLineMesh, Animation }
 
 // function
 export * from './utils/ModelLoader'
