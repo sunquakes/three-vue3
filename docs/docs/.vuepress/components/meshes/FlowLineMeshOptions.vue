@@ -31,7 +31,7 @@ const points = [
 ]
 const mesh = new FlowLineMesh({
   points,
-  color: [0.0, 0.2, 0.6, 0.8],
+  color: [0.086, 0.467, 1, 0.8],
   arrowColor: [1, 1, 1],
   speed: 0.5,
   width: 0.4,

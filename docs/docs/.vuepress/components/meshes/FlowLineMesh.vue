@@ -34,7 +34,7 @@ const mesh = new FlowLineMesh({
   width: 0.3,
   axis: AxisType.Z,
   textureRepeat: 8,
-  color: [0.0, 0.2, 0.6, 0.8],
+  color: [0.086, 0.467, 1, 0.8],
   arrowColor: [1, 1, 1],
   speed: 0.3
 })
