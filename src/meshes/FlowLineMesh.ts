@@ -186,17 +186,21 @@ function getLineMaterial(
         // Fixed width core line (60% width, slightly wider than arrows)
         float core = 1.0 - smoothstep(0.0, 0.6, centerDist);
         
-        // Strong outer glow (extends to 4x line width)
-        float outerGlow = 1.0 - smoothstep(0.6, 4.0, centerDist);
+        // Gradient glow - more transparent towards edges
+        // Glow from 60% to 400%, fading out smoothly
+        float glowGradient = 1.0 - smoothstep(0.6, 4.0, centerDist);
+        
+        // Alpha decreases from inner (0.8) to outer (0.0)
+        float glowAlpha = glowGradient * (1.0 - centerDist / 4.0);
         
         // Static glow intensity
-        float glow = core + outerGlow * 0.5;
+        float glow = core + glowAlpha * 0.6;
         
         // Arrow brightness
         float arrowBrightness = max(max(texColor.r, texColor.g), texColor.b);
         
         // Enhanced brightness for sci-fi look
-        vec3 glowColor = lineColor.rgb * (1.5 + outerGlow * 0.5);
+        vec3 glowColor = lineColor.rgb * (1.5 + glowGradient * 0.5);
         
         // Mix: arrows on top of glowing line
         vec3 finalColor = mix(glowColor, arrowColor * 1.5, arrowBrightness);
