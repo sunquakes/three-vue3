@@ -183,28 +183,24 @@ function getLineMaterial(
         // Calculate distance from center (0 = center, 1 = edge of line)
         float centerDist = abs(vUv.y - 0.5) * 2.0;
         
-        // Sharp inner line core (30% width)
-        float core = 1.0 - smoothstep(0.0, 0.3, centerDist);
+        // Fixed width core line (60% width, slightly wider than arrows)
+        float core = 1.0 - smoothstep(0.0, 0.6, centerDist);
         
-        // Strong outer glow (extends to 5x line width)
-        float outerGlow = 1.0 - smoothstep(0.3, 5.0, centerDist);
+        // Strong outer glow (extends to 4x line width)
+        float outerGlow = 1.0 - smoothstep(0.6, 4.0, centerDist);
         
-        // Pulsing glow effect
-        float pulse = 1.0 + 0.5 * sin(time * 2.0);
-        
-        // Combine core and glow
-        float glow = core + outerGlow * 0.6 * pulse;
+        // Static glow intensity
+        float glow = core + outerGlow * 0.5;
         
         // Arrow brightness
         float arrowBrightness = max(max(texColor.r, texColor.g), texColor.b);
         
         // Enhanced brightness for sci-fi look
-        vec3 brightColor = lineColor.rgb * 2.0;
-        vec3 glowColor = lineColor.rgb * (1.5 + outerGlow);
+        vec3 glowColor = lineColor.rgb * (1.5 + outerGlow * 0.5);
         
         // Mix: arrows on top of glowing line
         vec3 finalColor = mix(glowColor, arrowColor * 1.5, arrowBrightness);
-        float finalAlpha = glow * lineColor.a * (0.7 + 0.3 * arrowBrightness);
+        float finalAlpha = glow * lineColor.a * (0.8 + 0.2 * arrowBrightness);
         
         gl_FragColor = vec4(finalColor, finalAlpha);
       }
