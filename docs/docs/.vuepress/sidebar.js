@@ -15,7 +15,7 @@ export default function (options) {
       text: options.meshText,
       collapsible: true,
       prefix: 'meshes/',
-      children: ['wave-circle-mesh']
+      children: ['wave-circle-mesh', 'flow-line-mesh']
     },
     {
       text: options.effectText,

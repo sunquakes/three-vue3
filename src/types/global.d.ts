@@ -39,6 +39,16 @@ declare global {
     speed?: number
     verticalAxis?: AxisType
   }
+
+  type FlowLineMeshOptions = {
+    points?: THREE.Vector3[]
+    color?: Array4
+    arrowColor?: Array3
+    speed?: number
+    width?: number
+    axis?: AxisType
+    textureRepeat?: number
+  }
 }
 
 export {}

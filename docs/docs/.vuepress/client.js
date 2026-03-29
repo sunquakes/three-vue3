@@ -14,6 +14,8 @@ import Popup from './components/Popup.vue'
 import MovableElement from './components/MovableElement.vue'
 import WaveCircleMesh from './components/meshes/WaveCircleMesh.vue'
 import WaveCircleMeshOptions from './components/meshes/WaveCircleMeshOptions.vue'
+import FlowLineMesh from './components/meshes/FlowLineMesh.vue'
+import FlowLineMeshOptions from './components/meshes/FlowLineMeshOptions.vue'
 import Bloom from './components/effects/Bloom.vue'
 import Animation from './components/Animation.vue'
 import Index from './components/Index.vue'
@@ -39,6 +41,8 @@ export default defineClientConfig({
     app.component('MovableElement', MovableElement)
     app.component('WaveCircleMesh', WaveCircleMesh)
     app.component('WaveCircleMeshOptions', WaveCircleMeshOptions)
+    app.component('FlowLineMesh', FlowLineMesh)
+    app.component('FlowLineMeshOptions', FlowLineMeshOptions)
     app.component('Bloom', Bloom)
     app.component('Animation', Animation)
     app.component('Index', Index)
