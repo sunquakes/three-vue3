@@ -1,3 +1,17 @@
+## [0.0.7] - 2026-03-29
+
+### Added
+
+- Add FlowLineMesh for animated flow visualization.
+
+### Modified
+
+- Improve FlowLineMesh arrow texture with clean chevron pattern.
+- Increase default flow speed for better visual effect.
+- Update FlowLineMesh documentation and examples.
+
+---
+
 ## [0.0.6] - 2025-02-24
 
 ### Added

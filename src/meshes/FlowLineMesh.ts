@@ -3,7 +3,7 @@ import { AxisType } from '../enums/AxisType'
 
 function createArrowTexture(arrowColor: [number, number, number]): THREE.CanvasTexture {
   const canvas = document.createElement('canvas')
-  canvas.width = 256
+  canvas.width = 512
   canvas.height = 256
   
   const ctx = canvas.getContext('2d')
@@ -18,53 +18,29 @@ function createArrowTexture(arrowColor: [number, number, number]): THREE.CanvasT
   
   ctx.fillStyle = `rgb(${r}, ${g}, ${b})`
   
-  // Draw dotted arrow pattern (pointing left, matching flow direction)
-  // V-shaped arrow made of dots
-  const dotRadius = 6
-  const dotSpacing = 18
-  const startX = 100
+  // Draw single chevron arrow pointing right
+  const arrowWidth = 60
+  const arrowHeight = 80
+  const lineThickness = 25
+  const centerX = 256
   const centerY = 128
   
-  // Top arm of V (going up-left)
+  // Top arm of > (going down-right)
   ctx.beginPath()
-  ctx.arc(startX, centerY, dotRadius, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 0.7, centerY - dotSpacing * 0.5, dotRadius, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 1.4, centerY - dotSpacing, dotRadius, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 2.1, centerY - dotSpacing * 1.5, dotRadius, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 2.8, centerY - dotSpacing * 2, dotRadius, 0, Math.PI * 2)
+  ctx.moveTo(centerX - arrowWidth / 2, centerY - arrowHeight / 2)
+  ctx.lineTo(centerX + arrowWidth / 2, centerY)
+  ctx.lineTo(centerX + arrowWidth / 2 - lineThickness, centerY + lineThickness * 0.5)
+  ctx.lineTo(centerX - arrowWidth / 2, centerY - arrowHeight / 2 + lineThickness)
+  ctx.closePath()
   ctx.fill()
   
-  // Bottom arm of V (going down-left)
+  // Bottom arm of > (going up-right)
   ctx.beginPath()
-  ctx.arc(startX, centerY, dotRadius, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 0.7, centerY + dotSpacing * 0.5, dotRadius, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 1.4, centerY + dotSpacing, dotRadius, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 2.1, centerY + dotSpacing * 1.5, dotRadius, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 2.8, centerY + dotSpacing * 2, dotRadius, 0, Math.PI * 2)
-  ctx.fill()
-  
-  // Fill inner dots to make arrow more solid
-  // Inner top row
-  ctx.beginPath()
-  ctx.arc(startX - dotSpacing * 0.35, centerY - dotSpacing * 0.25, dotRadius * 0.9, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 1.05, centerY - dotSpacing * 0.75, dotRadius * 0.9, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 1.75, centerY - dotSpacing * 1.25, dotRadius * 0.9, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 2.45, centerY - dotSpacing * 1.75, dotRadius * 0.8, 0, Math.PI * 2)
-  ctx.fill()
-  
-  // Inner bottom row
-  ctx.beginPath()
-  ctx.arc(startX - dotSpacing * 0.35, centerY + dotSpacing * 0.25, dotRadius * 0.9, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 1.05, centerY + dotSpacing * 0.75, dotRadius * 0.9, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 1.75, centerY + dotSpacing * 1.25, dotRadius * 0.9, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 2.45, centerY + dotSpacing * 1.75, dotRadius * 0.8, 0, Math.PI * 2)
-  ctx.fill()
-  
-  // Center fill dots
-  ctx.beginPath()
-  ctx.arc(startX - dotSpacing * 0.7, centerY, dotRadius * 0.9, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 1.4, centerY, dotRadius * 0.9, 0, Math.PI * 2)
-  ctx.arc(startX - dotSpacing * 2.1, centerY, dotRadius * 0.8, 0, Math.PI * 2)
+  ctx.moveTo(centerX - arrowWidth / 2, centerY + arrowHeight / 2)
+  ctx.lineTo(centerX + arrowWidth / 2, centerY)
+  ctx.lineTo(centerX + arrowWidth / 2 - lineThickness, centerY - lineThickness * 0.5)
+  ctx.lineTo(centerX - arrowWidth / 2, centerY + arrowHeight / 2 - lineThickness)
+  ctx.closePath()
   ctx.fill()
   
   const texture = new THREE.CanvasTexture(canvas)
@@ -183,12 +159,11 @@ function getLineMaterial(
         // Calculate distance from center (0 = center, 1 = edge of line)
         float centerDist = abs(vUv.y - 0.5) * 2.0;
         
-        // Fixed width core line (60% width, slightly wider than arrows)
-        float core = 1.0 - smoothstep(0.0, 0.6, centerDist);
+        // Fixed width core line with smoother edge (wider core)
+        float core = 1.0 - smoothstep(0.0, 0.95, centerDist);
         
-        // Gradient glow - more transparent towards edges
-        // Glow from 60% to 400%, fading out smoothly
-        float glowGradient = 1.0 - smoothstep(0.6, 4.0, centerDist);
+        // Gradient glow - smoother transition from core edge
+        float glowGradient = 1.0 - smoothstep(0.5, 4.0, centerDist);
         
         // Alpha decreases from inner (0.8) to outer (0.0)
         float glowAlpha = glowGradient * (1.0 - centerDist / 4.0);
@@ -230,7 +205,7 @@ export default class FlowLineMesh extends THREE.Mesh {
     const arrowColor = options.arrowColor ?? [1, 1, 1]
     const axis = options.axis ?? AxisType.Z
     const textureRepeat = options.textureRepeat ?? 20
-    const speed = options.speed ?? 4.0
+    const speed = options.speed ?? 16.0
     
     const { geometry } = createLineGeometry(points, width, axis)
     const { material, texture } = getLineMaterial(color, arrowColor, textureRepeat)

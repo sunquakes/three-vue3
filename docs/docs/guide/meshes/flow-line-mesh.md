@@ -38,6 +38,7 @@ const mesh = new FlowLineMesh({
   width: 0.3,
   axis: AxisType.Z,
   textureRepeat: 8,
+  speed: 16,
   color: [0.0, 1.0, 1.0, 1]
 })
 const created = (scene, { camera }) => {
@@ -91,7 +92,7 @@ const points = [
 const mesh = new FlowLineMesh({
   points,
   color: [0.0, 1.0, 1.0, 1],
-  speed: 2,
+  speed: 16,
   width: 0.4,
   axis: AxisType.Z,
   textureRepeat: 10
