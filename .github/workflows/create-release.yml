@@ -23,13 +23,6 @@ jobs:
         run: |
           npm install -g pnpm
 
-      - name: Update package.json version from tag
-        run: |
-          # Extract version from tag (refs/tags/v0.0.7 -> 0.0.7)
-          VERSION=${GITHUB_REF#refs/tags/}
-          echo "Updating package.json version to $VERSION"
-          npm version $VERSION --no-git-tag-version --allow-same-version
-
       - name: Build Library
         run: |
           pnpm i
