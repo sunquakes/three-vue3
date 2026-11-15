@@ -1,24 +1,33 @@
-import * as THREE from 'three'
+import {
+  Mesh,
+  Group,
+  Object3D,
+  AnimationMixer,
+  AnimationClip,
+  AnimationAction,
+  LoopOnce,
+  LoopRepeat,
+  LoopPingPong
+} from 'three'
 
 export default class Animation {
   /**
-   * THREE.AnimationMixer instance.
-   * @defaultValue `new THREE.AnimationMixer(mesh)`
+   * AnimationMixer instance.
+   * @defaultValue `new AnimationMixer(mesh)`
    */
-  mixer: THREE.AnimationMixer
+  mixer: AnimationMixer
 
   /**
    * Array with object's animation clips.
    * @defaultValue `[]`
    */
-  animations: THREE.AnimationClip[]
+  animations: AnimationClip[]
 
   /**
    * Animation loop type.
-   * @defaultValue `THREE.LoopOnce`
+   * @defaultValue `LoopRepeat`
    */
-  loop: typeof THREE.LoopOnce | typeof THREE.LoopRepeat | typeof THREE.LoopPingPong =
-    THREE.LoopRepeat
+  loop: typeof LoopOnce | typeof LoopRepeat | typeof LoopPingPong = LoopRepeat
 
   /**
    * Animation delta time.
@@ -36,13 +45,13 @@ export default class Animation {
    * Array with object's animation actions.
    * @defaultValue `[]`
    */
-  clipActions: THREE.AnimationAction[] = []
+  clipActions: AnimationAction[] = []
 
   /**
    * Current animation action.
    * @defaultValue `null`
    */
-  clipAction: THREE.AnimationAction | null = null
+  clipAction: AnimationAction | null = null
 
   /**
    * Animation loop status.
@@ -50,9 +59,17 @@ export default class Animation {
    */
   isAnimating: boolean = false
 
-  constructor(mesh: THREE.Mesh) {
-    this.mixer = new THREE.AnimationMixer(mesh)
-    this.animations = mesh.animations
+  private animationId: number | null = null
+
+  constructor(obj: Mesh | Group | Object3D, animations?: AnimationClip[]) {
+    this.mixer = new AnimationMixer(obj)
+    if (animations) {
+      this.animations = animations
+    } else if ('animations' in obj && Array.isArray(obj.animations)) {
+      this.animations = obj.animations as AnimationClip[]
+    } else {
+      this.animations = []
+    }
   }
 
   /**
@@ -79,9 +96,7 @@ export default class Animation {
    * Set animation loop type.
    * @param loop - Animation loop type.
    */
-  setLoop(
-    loop: typeof THREE.LoopOnce | typeof THREE.LoopRepeat | typeof THREE.LoopPingPong
-  ): Animation {
+  setLoop(loop: typeof LoopOnce | typeof LoopRepeat | typeof LoopPingPong): Animation {
     this.setProperty('loop', loop)
     this.loop = loop
     return this
@@ -110,16 +125,16 @@ export default class Animation {
    * @param propertyName - Name of the property to set.
    * @param value - Value to set for the property.
    */
-  setProperty(propertyName: string, value: any): void {
+  setProperty(propertyName: string, value: unknown): void {
     if (this.clipAction) {
       if (propertyName in this.clipAction) {
-        ;(this.clipAction as any)[propertyName] = value
+        ;(this.clipAction as unknown as Record<string, unknown>)[propertyName] = value
       }
     }
     if (this.clipActions.length > 0) {
       this.clipActions.forEach((action) => {
         if (propertyName in action) {
-          ;(action as any)[propertyName] = value
+          ;(action as unknown as Record<string, unknown>)[propertyName] = value
         }
       })
     }
@@ -168,7 +183,7 @@ export default class Animation {
    */
   animate() {
     const animate = () => {
-      requestAnimationFrame(animate)
+      this.animationId = requestAnimationFrame(animate)
       this.mixer.update(this.deltaTime)
     }
     if (!this.isAnimating) {
@@ -215,5 +230,20 @@ export default class Animation {
         action.paused = true
       })
     }
+  }
+
+  /**
+   * Dispose animation and release resources.
+   */
+  dispose(): void {
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId)
+      this.animationId = null
+    }
+    this.isAnimating = false
+    this.stopAll()
+    this.mixer.stopAllAction()
+    this.clipActions = []
+    this.clipAction = null
   }
 }

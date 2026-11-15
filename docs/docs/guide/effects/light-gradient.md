@@ -1,0 +1,117 @@
+---
+lang: en-US
+title: Light Gradient
+---
+
+::: tip type
+Class
+:::
+
+`LightGradient` animates the color and intensity of a light — or of every light inside a group — from its current values to target values with an ease-out-cubic curve. The animation advances on its own from the render timer; `onComplete` fires once the transition finishes.
+
+## Default Usage
+
+<LightGradientDemo />
+
+::: details Click me to view the codes
+
+```vue
+<template>
+  <tv-scene class="scene" bg-color="rgb(40, 42, 54)" @created="created"></tv-scene>
+</template>
+
+<script lang="ts" setup>
+import { onBeforeUnmount } from 'vue'
+import * as THREE from 'three'
+import { LightGradient } from 'three-vue3'
+
+let gradient: LightGradient | undefined
+let mesh: THREE.Mesh | undefined
+
+const created = (scene, { camera, light }) => {
+  if (!camera || !light) return
+
+  camera.position.set(0, 0, 4)
+  camera.lookAt(0, 0, 0)
+
+  // Add an orange cube to show the lighting effect.
+  mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1.5, 1.5, 1.5),
+    new THREE.MeshStandardMaterial({ color: 0xff6600, roughness: 0.5, metalness: 0.5 })
+  )
+  mesh.position.y = 0.75
+  scene.add(mesh)
+
+  // Loop gradient animation.
+  const loopGradient = () => {
+    // Reset all lights in the group to base intensity before starting a new
+    // gradient cycle. `light` is a Group (AmbientLight + DirectionalLight).
+    light.traverse((child) => {
+      if (child.isLight) child.intensity = 2
+    })
+    gradient?.dispose()
+    gradient = new LightGradient(light, {
+      intensity: 20,
+      duration: 4000,
+      onComplete: loopGradient
+    })
+  }
+
+  loopGradient()
+}
+
+onBeforeUnmount(() => {
+  gradient?.dispose()
+  gradient = undefined
+  if (mesh) {
+    mesh.parent?.remove(mesh)
+    mesh.geometry.dispose()
+    ;(mesh.material as THREE.Material).dispose()
+    mesh = undefined
+  }
+})
+</script>
+
+<style>
+.scene {
+  margin-top: 10px;
+  margin-bottom: 16px;
+  width: 100%;
+  height: 300px;
+}
+</style>
+```
+
+:::
+
+## Options
+
+| Name       | Type                | Default | Description                                            |
+| ---------- | ------------------- | ------- | ------------------------------------------------------ |
+| color      | string \| number    | -       | `optional` Target light color (hex string or number).  |
+| intensity  | number              | -       | `optional` Target light intensity.                     |
+| duration   | number              | `1000`  | `optional` Duration of the gradient in milliseconds.   |
+| onComplete | () => void          | -       | `optional` Callback fired when the animation completes. |
+
+## Methods
+
+| Name        | Parameters                        | Description                                            |
+| ----------- | --------------------------------- | ------------------------------------------------------ |
+| constructor | (light: THREE.Light \| THREE.Object3D, options?) | Create a gradient and start it from the current light values. |
+| dispose     | () => void                        | Stop the gradient animation and release resources.      |
+
+## Class usage
+
+```ts
+import { LightGradient } from 'three-vue3'
+
+const gradient = new LightGradient(light, {
+  color: '#ff0000',
+  intensity: 10,
+  duration: 2000,
+  onComplete: () => console.log('done')
+})
+
+// On teardown:
+gradient.dispose()
+```

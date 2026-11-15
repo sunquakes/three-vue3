@@ -30,3 +30,6 @@ coverage
 
 .temp
 .cache
+
+# Generated skill archive
+docs/docs/.vuepress/public/skills/

@@ -3,6 +3,7 @@ import { GLTFLoader as THREEGLTFLoader } from 'three/examples/jsm/loaders/GLTFLo
 import { FBXLoader as THREEFBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import { OBJLoader as THREEOBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 import { MTLLoader as THREEMTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
 const OBJECT_STORE = 'THREE_VUE_OBJECT_STORE'
 const DB_NAME = 'THREE_VUE_OBJECT_DB'
@@ -162,16 +163,60 @@ async function fetchWithProgress(
   return arrayBuffer.buffer
 }
 
+export interface GLTFLoaderOptions {
+  /** Enable Draco mesh decompression, default: false */
+  draco?: boolean
+  /** Base URL of the Draco decoder, default: the official gstatic decoder */
+  dracoDecoderPath?: string
+}
+
+function getDefaultDecoderPath(): string {
+  return 'https://www.gstatic.com/draco/versioned/decoders/1.5.7/'
+}
+
+let dracoLoader: DRACOLoader | null = null
+
+function getDRACOLoader(decoderPath?: string): DRACOLoader {
+  if (!dracoLoader) {
+    dracoLoader = new DRACOLoader()
+    dracoLoader.setDecoderPath(decoderPath || getDefaultDecoderPath())
+    dracoLoader.preload()
+  }
+  return dracoLoader
+}
+
+/**
+ * Absolute directory of `url`. Parsing relative to it (instead of an empty
+ * string) lets `.bin` buffers and textures referenced by a glTF resolve.
+ */
+function getResourcePath(url: string): string {
+  const absolute = typeof document === 'undefined' ? url : new URL(url, document.baseURI).href
+  return absolute.slice(0, absolute.lastIndexOf('/') + 1)
+}
+
+/**
+ * Load a glTF/GLB model.
+ *
+ * The second argument may either be the `cache` flag, keeping the original
+ * positional API, or a `GLTFLoaderOptions` object. The object form is the
+ * concise way to enable Draco: `GLTFLoader(url, { draco: true })`.
+ */
 export async function GLTFLoader(
   url: string,
-  cache?: boolean,
-  onProgress?: (event: LoadEvent) => void
+  cache?: boolean | GLTFLoaderOptions,
+  onProgress?: (event: LoadEvent) => void,
+  options?: GLTFLoaderOptions
 ): Promise<THREE.Group> {
-  const data = await fileLoader(url, cache, onProgress)
+  const loaderOptions = typeof cache === 'object' ? cache : options
+  const useCache = typeof cache === 'boolean' ? cache : undefined
+  const data = await fileLoader(url, useCache, onProgress)
   const loader = new THREEGLTFLoader()
+  if (loaderOptions?.draco) {
+    loader.setDRACOLoader(getDRACOLoader(loaderOptions.dracoDecoderPath))
+  }
   return new Promise((resolve) => {
     onProgress?.({ type: 'parse', progress: 0 })
-    loader.parse(data, '', (gltf) => {
+    loader.parse(data, getResourcePath(url), (gltf) => {
       const model = gltf.scene
       model.animations = gltf.animations
       onProgress?.({ type: 'parse', progress: 100 })
@@ -216,4 +261,39 @@ export async function OBJLoader(
     onProgress?.({ type: 'parse', progress: 100 })
     resolve(model)
   })
+}
+
+/** Release the shared Draco decoder, call when the last model is gone. */
+export function disposeDRACOLoader(): void {
+  if (dracoLoader) {
+    dracoLoader.dispose()
+    dracoLoader = null
+  }
+}
+
+/**
+ * Dispose every geometry, material and texture under `model` and detach it from
+ * its parent. Call before dropping a loaded model so GPU memory is reclaimed.
+ */
+export function disposeModel(model: THREE.Object3D): void {
+  model.traverse((object) => {
+    const mesh = object as THREE.Mesh
+    if (mesh.geometry) mesh.geometry.dispose()
+
+    const material = mesh.material
+    if (!material) return
+
+    const materials = Array.isArray(material) ? material : [material]
+    for (const item of materials) {
+      for (const value of Object.values(item)) {
+        if (value && typeof value === 'object') {
+          const texture = value as THREE.Texture
+          if (texture.isTexture) texture.dispose()
+        }
+      }
+      item.dispose()
+    }
+  })
+
+  model.parent?.remove(model)
 }

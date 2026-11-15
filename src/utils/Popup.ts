@@ -1,4 +1,4 @@
-import { createApp, type Component, type ComponentPublicInstance } from 'vue'
+import { createApp, type App, type Component, type ComponentPublicInstance } from 'vue'
 import { generateUUID } from './UUID'
 
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js'
@@ -55,6 +55,16 @@ export default class Popup {
    */
   component: ComponentPublicInstance
 
+  /**
+   * Vue app that renders the popup component.
+   */
+  private app: App | undefined
+
+  /**
+   * Animation frame ID of the move loop.
+   */
+  private animationId: number | null = null
+
   constructor(position: Position, component: Component, props: object) {
     this.id = 'popup-' + generateUUID()
     this.duration = 0
@@ -87,6 +97,7 @@ export default class Popup {
     this.scene = new CSS2DObject(containerElement)
     this.scene.position.set(...position)
     const app = createApp(component, props || {})
+    this.app = app
     return app.mount(`#${this.id}`)
   }
 
@@ -103,7 +114,7 @@ export default class Popup {
     this.position = position
     if (this.state === false) {
       this.state = true
-      requestAnimationFrame(this.update)
+      this.animationId = requestAnimationFrame(this.update)
     }
   }
 
@@ -135,10 +146,25 @@ export default class Popup {
     }
 
     if (this.duration > 0) {
-      requestAnimationFrame(this.update)
+      this.animationId = requestAnimationFrame(this.update)
     } else {
       this.state = false
+      this.animationId = null
     }
+  }
+
+  /**
+   * Stop the move loop, unmount the Vue app and remove the DOM container.
+   */
+  dispose(): void {
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId)
+      this.animationId = null
+    }
+    this.state = false
+    this.app?.unmount()
+    this.app = undefined
+    document.getElementById(this.id)?.remove()
   }
 
   /**

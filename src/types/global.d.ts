@@ -1,25 +1,44 @@
+import type { Renderer } from 'three/webgpu'
+
 declare global {
+  /**
+   * Unified renderer type accepted by the library. Covers both the default
+   * WebGPU renderer (`three/webgpu`) and a classic `WebGLRenderer`, which are
+   * structurally compatible for the surface used here.
+   */
+  type R3LRenderer = Renderer & {
+    readonly isWebGLRenderer?: boolean
+    readonly isWebGPURenderer?: boolean
+  }
+
   type CallbackFrame = (
-    renderer: THREE.WebGLRenderer,
+    renderer: R3LRenderer,
     scene: THREE.Scene,
-    components: SceneComponents
+    components: SceneComponents,
+    delta: number
   ) => void
 
   type SceneComponents = {
+    renderer?: R3LRenderer
     camera?: THREE.Camera
-    light?: THREE.Light
+    light?: THREE.Object3D
     axesHelper?: THREE.AxesHelper | undefined | boolean
+    gridHelper?: THREE.GridHelper | undefined | boolean
     controls?: OrbitControls | undefined | boolean
+    geo?: import('../crs/GeoReference').GeoReference
   }
 
   type SceneSlotProps = {
     container?: HTMLElement
-    renderer?: THREE.WebGLRenderer
+    renderer?: R3LRenderer
     scene?: THREE.Scene
     sceneComponents?: SceneComponents
+    geo?: import('../crs/GeoReference').GeoReference
+    picker?: import('../utils/Picker').default
     setFrame?: (callback: CallbackFrame) => void
-    addBeforeFrame?: (callback: CallbackFrame) => void
-    addAfterFrame?: (callback: CallbackFrame) => void
+    resetFrame?: () => void
+    addBeforeFrame?: (callback: CallbackFrame) => () => void
+    addAfterFrame?: (callback: CallbackFrame) => () => void
   }
 
   type Array3 = [number, number, number]

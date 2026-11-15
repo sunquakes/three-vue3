@@ -19,14 +19,23 @@ Class
 </template>
 
 <script lang="ts" setup>
+import { onBeforeUnmount } from 'vue'
 import { Popup } from 'three-vue3'
 import TrafficLight from './TrafficLight.vue'
 
-const popup = new Popup([0, 0, 0], TrafficLight, {})
+let popup: Popup | undefined
+
 const created = (scene) => {
+  popup = new Popup([0, 0, 0], TrafficLight, {})
   scene.add(popup.scene)
   popup.moveTo([0, 0.5, 0], 10000)
 }
+
+// Release the Vue app, the DOM container and the move loop.
+onBeforeUnmount(() => {
+  popup?.dispose()
+  popup = undefined
+})
 </script>
 
 <style>
@@ -136,3 +145,4 @@ export default {
 | ----------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | constructor | (position: [number, number, number], component: Component, props: object) => void | `props` is the component's props.                                                 |
 | moveTo      | (position: [number, number, number], duration: number) => void                    | `duration` is the duration from one position to another. The unit is millisecond. |
+| dispose     | () => void                                                                        | Stops the move loop, unmounts the popup component and removes its DOM container.  |

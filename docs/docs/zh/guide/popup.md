@@ -19,14 +19,23 @@ title: 弹出窗口
 </template>
 
 <script lang="ts" setup>
+import { onBeforeUnmount } from 'vue'
 import { Popup } from 'three-vue3'
 import TrafficLight from './TrafficLight.vue'
 
-const popup = new Popup([0, 0, 0], TrafficLight, {})
+let popup: Popup | undefined
+
 const created = (scene) => {
+  popup = new Popup([0, 0, 0], TrafficLight, {})
   scene.add(popup.scene)
   popup.moveTo([0, 0.5, 0], 10000)
 }
+
+// 释放 Vue 应用、DOM 容器与移动循环。
+onBeforeUnmount(() => {
+  popup?.dispose()
+  popup = undefined
+})
 </script>
 
 <style>
@@ -136,3 +145,4 @@ export default {
 | ----------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------- |
 | constructor | (position: [number, number, number], component: Component, props: object) => void | `props` 是组件的属性。                                      |
 | moveTo      | (position: [number, number, number], duration: number) => void                    | `duration` 是从一个位置移动到另一个位置的时间，单位是毫秒。 |
+| dispose     | () => void                                                                        | 停止移动循环，卸载弹窗组件并移除其 DOM 容器。               |
