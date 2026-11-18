@@ -59,6 +59,8 @@ export interface BeachUniforms {
   sand: UniformNode<'vec3', THREE.Vector3>
   waterDeep: UniformNode<'vec3', THREE.Vector3>
   waterShallow: UniformNode<'vec3', THREE.Vector3>
+  /** Scene background colour, used to fill rays that miss sand and water. */
+  background: UniformNode<'vec3', THREE.Vector3>
   sunDisk: UniformNode<'float', number>
   discSize: UniformNode<'float', number>
   night: UniformNode<'float', number>
@@ -86,6 +88,7 @@ export function createBeachUniforms(): BeachUniforms {
     sand: vectorUniform('#cdb698'),
     waterDeep: vectorUniform('#0b2f4a'),
     waterShallow: vectorUniform('#3d7f84'),
+    background: vectorUniform('#282a36'),
     sunDisk: uniform(2.4),
     discSize: uniform(1.2),
     night: uniform(0),
@@ -373,11 +376,16 @@ const beachSandShadeNode = (
 
   const sparkle = pow(
     max(dot(reflect(view.negate(), normal), uniforms.sunDirection), 0),
-    12
+    26
   )
   color = color.add(
     uniforms.sunColor.mul(
-      sparkle.mul(residueNoise).mul(uniforms.sunLight).mul(float(1).sub(wet)).mul(0.5)
+      sparkle
+        .mul(residueNoise)
+        .mul(uniforms.sunLight)
+        .mul(float(1).sub(wet))
+        .mul(float(1).sub(smoothstep(40, 160, distance)))
+        .mul(0.24)
     )
   )
 
@@ -397,6 +405,10 @@ const beachWaterShadeNode = (
   const bed = beachHeightNode(float(BEACH_RADIUS).sub(radius))
   const depth = max(level.height.sub(bed), 0)
 
+  // Far swells are smaller than a pixel and turn into crawling stripes, so
+  // their slope contribution is faded out with distance.
+  const slopeFade = float(1).sub(smoothstep(70, 280, distance))
+
   const micro = microGradientNode(
     worldPosition.xz,
     distance,
@@ -405,9 +417,9 @@ const beachWaterShadeNode = (
   )
   const normal = normalize(
     vec3(
-      level.gradient.x.add(micro.x).negate(),
+      level.gradient.x.mul(slopeFade).add(micro.x).negate(),
       1,
-      level.gradient.y.add(micro.y).negate()
+      level.gradient.y.mul(slopeFade).add(micro.y).negate()
     )
   )
   const view = normalize(cameraPosition.sub(worldPosition))
@@ -432,11 +444,13 @@ const beachWaterShadeNode = (
 
   let color: Node<'vec3'> = mix(body, bedColor, seeFloor)
 
-  // Sun glitter: a tight sparkling core inside a broad, soft path.
+  // Sun glitter: a tight sparkling core inside a broad, soft path. Both are
+  // damped with distance so the highlights do not blow out into white bands.
   const sunReflect = reflect(view.negate(), normal)
   const alignment = max(dot(sunReflect, uniforms.sunDirection), 0)
-  const sparkle = pow(alignment, 380).mul(7.5)
-  const path = pow(alignment, 60).mul(0.45)
+  const glitterFade = float(1).sub(smoothstep(90, 320, distance))
+  const sparkle = pow(alignment, 170).mul(2).mul(glitterFade)
+  const path = pow(alignment, 24).mul(0.24).mul(glitterFade)
   color = color.add(
     uniforms.sunColor
       .mul(sparkle.add(path))
@@ -459,8 +473,12 @@ const beachWaterShadeNode = (
   )
   const lace = smoothstep(0.46, 0.56, foamNoise)
   const bubbles = smoothstep(0.56, 0.66, bubbleNoise)
-  const shoreBand = smoothstep(1.6, 0.02, depth)
-  const crest = smoothstep(0.1, 0.2, level.height).mul(smoothstep(14, 2, depth))
+  // Reversed edges are written as `1 - smoothstep` because WGSL leaves
+  // smoothstep undefined when the low edge is above the high edge.
+  const shoreBand = float(1).sub(smoothstep(0.02, 1.6, depth))
+  const crest = smoothstep(0.1, 0.2, level.height).mul(
+    float(1).sub(smoothstep(2, 14, depth))
+  )
   const foam = clamp(
     shoreBand
       .mul(float(0.12).add(lace.mul(0.8)))
@@ -481,7 +499,7 @@ const beachWaterShadeNode = (
 /**
  * Single-pass scene: sphere-trace the sand heightfield, intersect the wave
  * surface, and shade the nearest hit. Only sand and water are shaded; rays
- * that miss both stay transparent so the Scene background shows through.
+ * that miss both are filled with the Scene background colour.
  */
 const beachSceneColorNode = (
   direction: Node<'vec3'>,
@@ -514,34 +532,41 @@ const beachSceneColorNode = (
   })
 
   If(dir.y.lessThan(-0.0003), () => {
-    const hitT = float(0).toVar()
-    hitT.assign(float(0).sub(rayOrigin.y).div(dir.y))
-    Loop(3, () => {
-      const surfacePoint = rayOrigin.add(dir.mul(hitT))
-      const level = beachWaterLevelNode(surfacePoint.xz, uniforms.time).height
-      hitT.assign(level.sub(rayOrigin.y).div(dir.y))
-    })
-    waterT.assign(max(hitT, 0))
+    // Intersect the mean water plane, then apply a single bounded correction
+    // towards the wave surface. A fixed-point loop around the wave height
+    // amplifies float rounding at grazing angles, which shows up as hard
+    // horizontal bands and differs between the WebGPU and WebGL backends.
+    const planeT = float(0).sub(rayOrigin.y).div(dir.y)
+    const planePoint = rayOrigin.add(dir.mul(planeT))
+    const level = beachWaterLevelNode(planePoint.xz, uniforms.time).height
+    const shift = clamp(level.div(dir.y), -14, 0)
+    waterT.assign(max(planeT.add(shift), 0))
   })
 
   const color = vec3(0).toVar()
-  const alpha = float(0).toVar()
+  const shaded = float(0).toVar()
 
   If(waterT.lessThan(terrainT), () => {
     const waterPoint = rayOrigin.add(dir.mul(waterT))
     color.assign(beachWaterShadeNode(waterPoint, uniforms, noiseMap))
-    alpha.assign(1)
+    shaded.assign(1)
   }).Else(() => {
     If(terrainHit.greaterThan(0.5), () => {
       const sandPoint = rayOrigin.add(dir.mul(terrainT))
       color.assign(
         beachSandShadeNode(sandPoint, uniforms, noiseMap, footprintTexture)
       )
-      alpha.assign(1)
+      shaded.assign(1)
     })
   })
 
-  return vec4(beachToneMapNode(color, uniforms.exposure), alpha)
+  // The background fill is not tone-mapped, so it matches the Scene clear
+  // colour exactly. The material stays opaque: nothing relies on the canvas
+  // alpha channel any more, which behaves differently per backend.
+  return vec4(
+    mix(uniforms.background, beachToneMapNode(color, uniforms.exposure), shaded),
+    1
+  )
 }
 
 export interface CreateBeachMaterialsOptions {
@@ -562,9 +587,9 @@ export function createBeachMaterials({
 }: CreateBeachMaterialsOptions): BeachMaterials {
   const sky = new MeshBasicNodeMaterial({ name: 'SandyBeachSky' })
   sky.side = THREE.BackSide
-  // Rays that miss sand and water stay transparent, so the Scene background
-  // shows through where the sky used to be.
-  sky.transparent = true
+  // Opaque: rays that miss sand and water are filled with the background
+  // uniform inside the shader, so no alpha compositing takes place.
+  sky.transparent = false
   sky.depthWrite = false
   sky.depthTest = false
   sky.colorNode = Fn(() =>

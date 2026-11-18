@@ -212,6 +212,18 @@ export function mountBeachScene(
   const initialFrame = walker.update(0, { crouching: options.crouching() })
   applyPose(initialFrame)
 
+  const syncBackground = () => {
+    // The shader fills rays that miss sand and water itself, so it has to
+    // follow the Scene background colour instead of relying on canvas alpha.
+    if (scene.background instanceof THREE.Color) {
+      uniforms.background.value.set(
+        scene.background.r,
+        scene.background.g,
+        scene.background.b
+      )
+    }
+  }
+
   const removeFrame = addBeforeFrame(() => {
     clock.update()
     const delta = Math.min(clock.getDelta(), 0.1)
@@ -225,6 +237,7 @@ export function mountBeachScene(
     applyBeachPresetToUniforms(uniforms, presetState)
 
     uniforms.time.value = elapsed
+    syncBackground()
 
     const forwardInput = axis(['w', 'arrowup'], ['s', 'arrowdown'])
     const strafeInput = axis(['d', 'arrowright'], ['a', 'arrowleft'])

@@ -7,7 +7,7 @@ title: Sandy Beach
 Component
 :::
 
-A first-person dawn beach walk. The island is a 260 m ring, and the sand height, the wet band, the ocean swells and the footprints all share one set of shore coordinates, so the waterline, the walker and the shader stay aligned at every angle. A single fullscreen ray-march evaluates the sand heightfield and the wave surface in one TSL pass, then tone-maps the result with an ACES curve — the WebGPU and the WebGL renderer compile the same shader and produce the same image. Only sand and water are drawn: every ray above the horizon stays transparent, so the Scene background colour shows through there.
+A first-person dawn beach walk. The island is a 260 m ring, and the sand height, the wet band, the ocean swells and the footprints all share one set of shore coordinates, so the waterline, the walker and the shader stay aligned at every angle. A single fullscreen ray-march evaluates the sand heightfield and the wave surface in one TSL pass, then tone-maps the result with an ACES curve — the WebGPU and the WebGL renderer compile the same shader and produce the same image. Only sand and water are shaded: rays that miss both are filled with the Scene background colour, so the canvas stays opaque.
 
 Drag to look around, walk with `WASD` or the arrow keys, and scroll to take a step forward. Footprints are written into a small ring buffer and washed away by the tide.
 
@@ -65,6 +65,6 @@ Drag to look around, walk with `WASD` or the arrow keys, and scroll to take a st
 ## Notes
 
 - The component owns the camera while it is mounted. It saves the previous camera pose, field of view and near/far planes, disables the scene's `OrbitControls`, and restores all of them on unmount.
-- The beach is drawn by one fullscreen TSL shader on an inside-out sphere: it sphere-traces the sand, intersects the animated wave surface, and shades whichever hit is nearer, including depth-absorbed shallows, foam, wet sand and footprints. Rays that miss both hits stay transparent, so the Scene background shows through where the sky would be.
+- The beach is drawn by one fullscreen TSL shader on an inside-out sphere: it sphere-traces the sand, intersects the animated wave surface, and shades whichever hit is nearer, including depth-absorbed shallows, foam, wet sand and footprints. Rays that miss both hits are filled with the Scene background colour, keeping the canvas opaque and consistent across both renderers.
 - Every geometry, material, texture and event listener is disposed on unmount.
 - Changing a prop updates the running scene in place; it never rebuilds the beach.

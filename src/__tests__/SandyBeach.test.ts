@@ -15,6 +15,8 @@ import {
   toShoreCoordinates
 } from '../utils/BeachTerrain'
 import { BEACH_FOOTPRINT_CAPACITY, BeachFootprintTrail } from '../utils/BeachFootprints'
+import { createBeachMaterials, createBeachUniforms } from '../utils/BeachMaterials'
+import { createNoiseTexture } from '../utils/WaterNoise'
 import {
   BEACH_PRESET_NAMES,
   BEACH_PRESETS,
@@ -218,5 +220,29 @@ describe('BeachFootprintTrail', () => {
     expect(trail.written).toBe(BEACH_FOOTPRINT_CAPACITY)
 
     trail.dispose()
+  })
+})
+
+describe('beach materials', () => {
+  it('uses an opaque background fill instead of backend-dependent canvas alpha', () => {
+    const noiseMap = createNoiseTexture()
+    const footprints = new BeachFootprintTrail()
+    const uniforms = createBeachUniforms()
+    const { sky } = createBeachMaterials({
+      uniforms,
+      noiseMap,
+      footprintTexture: footprints.texture
+    })
+    const background = new THREE.Color('#282a36')
+
+    expect(sky.transparent).toBe(false)
+    expect(sky.depthWrite).toBe(false)
+    expect(uniforms.background.value.x).toBeCloseTo(background.r)
+    expect(uniforms.background.value.y).toBeCloseTo(background.g)
+    expect(uniforms.background.value.z).toBeCloseTo(background.b)
+
+    sky.dispose()
+    noiseMap.dispose()
+    footprints.dispose()
   })
 })
