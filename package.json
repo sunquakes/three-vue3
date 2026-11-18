@@ -1,7 +1,7 @@
 {
   "name": "three-vue3",
   "type": "module",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "packageManager": "pnpm@11.17.0",
   "author": "Shing Rui <sunquakes@outlook.com>",
   "keywords": [
