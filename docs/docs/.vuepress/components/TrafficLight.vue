@@ -26,7 +26,7 @@ export default {
     }
 
     onMounted(() => {
-      timer = setInterval(changeLight, 3000)
+      timer = setInterval(changeLight, 2000)
     })
 
     onUnmounted(() => {
@@ -43,37 +43,45 @@ export default {
 <style scoped>
 .traffic-light {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  width: 100px;
-  height: 20px;
-  background-color: #333;
-  border-radius: 4px;
-  padding: 4px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: #333;
+  border-radius: 6px;
+  border: 1px solid #666;
 }
 
 .light {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background-color: #555;
-  transition: background-color 0.5s;
+  transition: all 0.3s;
 }
 
 .red {
-  background-color: #ff4d4d;
+  background: #330000;
+}
+
+.red.active {
+  background: #ff0000;
+  box-shadow: 0 0 10px #ff0000;
 }
 
 .yellow {
-  background-color: #ffd700;
+  background: #333300;
+}
+
+.yellow.active {
+  background: #ffff00;
+  box-shadow: 0 0 10px #ffff00;
 }
 
 .green {
-  background-color: #4caf50;
+  background: #003300;
 }
 
-.active {
-  background-color: white;
+.green.active {
+  background: #00ff00;
+  box-shadow: 0 0 10px #00ff00;
 }
 </style>

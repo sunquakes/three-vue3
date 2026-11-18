@@ -58,6 +58,14 @@ Vue.use(ThreeVue3)
 </style>
 ```
 
+## 特性
+
+- 自动创建场景、相机、灯光与控制器。
+- 支持 GLB/GLTF 模型加载、IndexedDB 缓存以及可选的 Draco 解码。
+- `FitCamera`、`Picker`、`ModelRotator` 分别覆盖自动取景、悬停/点击拾取与转台动画。
+- `Rain`、`Snow` 与 `SkyDome` 通过参数总线共享全局太阳方向。
+- `useScene` / `useFrame` 向组合式 API 组件暴露运行时。
+
 ## 证书
 
 [Apache-2.0 license](/LICENSE)

@@ -17,6 +17,9 @@ English | [🇨🇳中文](https://github.com/sunquakes/three-vue3/blob/main/REA
 
 Visit [three-vue3.sunquakes.com](https://three-vue3.sunquakes.com).
 
+- [Live demo](https://three-vue3.sunquakes.com/demo.html)
+- [AI agent skill](https://three-vue3.sunquakes.com/ai/): install once, use in every repository
+
 ## Install
 
 ### Install `Three.js`
@@ -57,6 +60,14 @@ Vue.use(ThreeVue3)
 }
 </style>
 ```
+
+## Features
+
+- Scene, camera, lights and controls are created automatically.
+- Models load from GLB/GLTF with IndexedDB caching and optional Draco decoding.
+- `FitCamera`, `Picker` and `ModelRotator` cover framing, hover/click picking and turntable animation.
+- `Rain`, `Snow` and `SkyDome` share a global sun direction through the parameter bus.
+- `useScene` / `useFrame` expose the runtime to composition API components.
 
 ## License
 

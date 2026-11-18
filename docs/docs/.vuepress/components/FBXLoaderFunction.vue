@@ -1,5 +1,5 @@
 <template>
-  <tv-scene class="scene" @created="created"></tv-scene>
+  <tv-scene class="scene" bg-color="rgb(40, 42, 54)" @created="created"></tv-scene>
 </template>
 
 <script lang="ts" setup>
@@ -7,6 +7,7 @@ import { FBXLoader } from 'three-vue3'
 
 const created = async (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
+  camera.lookAt(0, 0, 0)
 
   // Load model to scene.
   const model = await FBXLoader('/models/perseverance.fbx')
@@ -18,6 +19,7 @@ const created = async (scene, { camera }) => {
 <style>
 .scene {
   margin-top: 10px;
+  margin-bottom: 16px;
   width: 100%;
   height: 300px;
 }

@@ -1,5 +1,5 @@
 <template>
-  <tv-scene class="scene" @created="created">
+  <tv-scene class="scene" bg-color="rgb(40, 42, 54)" @created="created">
     <tv-obj-loader v-model="objUrl" :mtl="mtlUrl" :scale="[0.8, 0.8, 0.8]"></tv-obj-loader>
   </tv-scene>
 </template>
@@ -18,7 +18,11 @@ const created = (scene, { camera }) => {
 <style>
 .scene {
   margin-top: 10px;
+  margin-bottom: 16px;
   width: 100%;
   height: 300px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  overflow: hidden;
 }
 </style>

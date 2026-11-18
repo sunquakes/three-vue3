@@ -8,11 +8,14 @@ export default defineComponent({
       async init() {
         const sceneSlotProps: SceneSlotProps | undefined = inject('sceneSlotProps')
         const scene = sceneSlotProps?.scene
-        const model = await GLTFLoader(props.modelValue, props.cache, (event) =>
-          emit('onProgress', event)
+        const model = await GLTFLoader(
+          props.modelValue,
+          props.cache,
+          (event) => emit('onProgress', event),
+          { draco: props.draco, dracoDecoderPath: props.dracoDecoderPath }
         )
         model.scale.set(...props.scale)
-        scene.add(model)
+        scene?.add(model)
         emit('loaded', model)
       }
     }
@@ -36,6 +39,13 @@ export default defineComponent({
     cache: {
       type: Boolean,
       default: true
+    },
+    draco: {
+      type: Boolean,
+      default: false
+    },
+    dracoDecoderPath: {
+      type: String
     }
   },
   mounted() {

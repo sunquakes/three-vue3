@@ -2,62 +2,69 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build Project",
+      "label": "1. Install Root Dependencies",
       "type": "shell",
-      "command": "pnpm",
-      "args": ["build"],
+      "command": "pnpm install",
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [],
-      "detail": "Execute pnpm build in project root directory"
+      "detail": "Step 1: Install all project dependencies in root directory"
     },
     {
-      "label": "Clean Docs node_modules",
+      "label": "2. Build Project",
       "type": "shell",
-      "command": "if (Test-Path '${workspaceFolder}\\docs\\node_modules') { Remove-Item '${workspaceFolder}\\docs\\node_modules' -Recurse -Force }",
+      "command": "pnpm run build",
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [],
-      "detail": "Delete docs/node_modules directory"
+      "detail": "Step 2: Build the three-vue3 library"
     },
     {
-      "label": "Clean Docs Cache",
+      "label": "3. Kill Docs Port",
       "type": "shell",
-      "command": "if (Test-Path '${workspaceFolder}\\docs\\docs\\.vuepress\\.cache') { Remove-Item '${workspaceFolder}\\docs\\docs\\.vuepress\\.cache' -Recurse -Force }; if (Test-Path '${workspaceFolder}\\docs\\docs\\.vuepress\\.temp') { Remove-Item '${workspaceFolder}\\docs\\docs\\.vuepress\\.temp' -Recurse -Force }",
+      "command": "$proc = Get-NetTCPConnection -LocalPort 8080,8081 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if ($proc) { $proc | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }; Write-Output 'Killed process on port 8080/8081' } else { Write-Output 'No process found on port 8080/8081' }; Start-Sleep -Seconds 1",
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [],
-      "detail": "Delete docs/docs/.vuepress/.cache and .temp directories"
+      "detail": "Step 3: Kill any process using the docs dev port"
     },
     {
-      "label": "Install Docs Dependencies",
+      "label": "4. Clean Docs node_modules",
       "type": "shell",
-      "command": "pnpm",
-      "args": ["install"],
+      "command": "$target = Join-Path '${workspaceFolder}' 'docs\\node_modules'; if (Test-Path -LiteralPath $target) { $full = [System.IO.Path]::GetFullPath($target); if (-not $full.StartsWith('\\\\?\\')) { $full = '\\\\?\\' + $full }; [System.IO.Directory]::Delete($full, $true); Write-Output 'node_modules permanently deleted (no recycle bin)' } else { Write-Output 'node_modules does not exist' }",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "Step 4: Permanently delete docs/node_modules with .NET Directory.Delete, so nothing goes to the recycle bin"
+    },
+    {
+      "label": "5. Clean Docs Cache",
+      "type": "shell",
+      "command": "foreach ($name in @('.cache', '.temp')) { $target = Join-Path '${workspaceFolder}' ('docs\\docs\\.vuepress\\' + $name); if (Test-Path -LiteralPath $target) { $full = [System.IO.Path]::GetFullPath($target); if (-not $full.StartsWith('\\\\?\\')) { $full = '\\\\?\\' + $full }; [System.IO.Directory]::Delete($full, $true); Write-Output ($name + ' permanently deleted (no recycle bin)') } else { Write-Output ($name + ' does not exist') } }",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "Step 5: Permanently delete docs/docs/.vuepress/.cache and .temp with .NET Directory.Delete, so nothing goes to the recycle bin"
+    },
+    {
+      "label": "6. Install Docs Dependencies",
+      "type": "shell",
+      "command": "pnpm install",
       "options": {
         "cwd": "${workspaceFolder}/docs"
       },
       "problemMatcher": [],
-      "detail": "Execute pnpm install in docs directory"
+      "detail": "Step 6: Install the docs dependencies"
     },
     {
-      "label": "Kill Running Dev Server",
+      "label": "7. Start Docs Dev Server",
       "type": "shell",
-      "command": "Get-NetTCPConnection -LocalPort 8080,8081 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }; Start-Sleep -Seconds 2; Write-Host 'Dev server stopped. Please manually close the terminal if still running.' -ForegroundColor Yellow",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": [],
-      "detail": "Kill running dev server by port to free port"
-    },
-    {
-      "label": "Start Docs Dev Server",
-      "type": "shell",
-      "command": "pnpm",
-      "args": ["docs:dev"],
+      "command": "pnpm run docs:dev",
       "options": {
         "cwd": "${workspaceFolder}/docs"
       },
@@ -66,19 +73,21 @@
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
-        "group": "docs"
+        "group": "docs",
+        "close": false
       },
-      "detail": "Start documentation development server in docs directory"
+      "detail": "Step 7: Start the VuePress dev server at http://localhost:8080"
     },
     {
-      "label": "Build and Start Docs",
+      "label": "Full Setup: Install + Build + Start Docs",
       "dependsOn": [
-        "Kill Running Dev Server",
-        "Build Project",
-        "Clean Docs node_modules",
-        "Clean Docs Cache",
-        "Install Docs Dependencies",
-        "Start Docs Dev Server"
+        "1. Install Root Dependencies",
+        "2. Build Project",
+        "3. Kill Docs Port",
+        "4. Clean Docs node_modules",
+        "5. Clean Docs Cache",
+        "6. Install Docs Dependencies",
+        "7. Start Docs Dev Server"
       ],
       "dependsOrder": "sequence",
       "problemMatcher": [],
@@ -86,7 +95,7 @@
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Complete workflow: Kill running server -> Build project -> Clean docs/node_modules -> Clean cache -> Install dependencies -> Start docs dev server"
+      "detail": "Complete workflow: Install dependencies -> Build project -> Kill port -> Clean docs -> Install docs deps -> Start VuePress dev server"
     }
   ]
 }

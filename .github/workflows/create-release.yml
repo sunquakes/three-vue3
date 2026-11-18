@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v3
@@ -15,9 +18,9 @@ jobs:
           fetch-depth: 0
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install Pnpm
         run: |
@@ -71,10 +74,16 @@ jobs:
 
       - name: Publish to NPM
         run: |
-          pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
-          pnpm publish --no-git-checks --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          npm install -g npm@latest
+          npm publish --access public --provenance
+
+      - name: Dump npm debug log on failure
+        if: failure()
+        run: |
+          for f in /home/runner/.npm/_logs/*-debug-0.log; do
+            echo "=== $f ==="
+            cat "$f"
+          done
 
       - name: Install Vuepress and Build Docs
         run: |

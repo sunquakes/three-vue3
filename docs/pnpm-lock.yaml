@@ -11,9 +11,6 @@ importers:
       '@vuepress/bundler-vite':
         specifier: ^2.0.0-rc.19
         version: 2.0.0-rc.20(@types/node@22.13.5)(sass@1.85.0)
-      '@vuepress/client':
-        specifier: 2.0.0-rc.19
-        version: 2.0.0-rc.19
       '@vuepress/theme-default':
         specifier: ^2.0.0-rc.19
         version: 2.0.0-rc.79(markdown-it@14.1.0)(sass@1.85.0)(vuepress@2.0.0-rc.20(@vuepress/bundler-vite@2.0.0-rc.20(@types/node@22.13.5)(sass@1.85.0))(vue@3.5.13))
@@ -27,11 +24,11 @@ importers:
         specifier: ^1.83.4
         version: 1.85.0
       three:
-        specifier: ^0.173.0
-        version: 0.173.0
+        specifier: ^0.184.0
+        version: 0.184.0
       three-vue3:
-        specifier: file:../
-        version: file:..(three@0.173.0)(vue@3.5.13)
+        specifier: file:..
+        version: file:..(three@0.184.0)(vue@3.5.13)
       vue:
         specifier: ^3.4.0
         version: 3.5.13
@@ -613,9 +610,6 @@ packages:
     resolution: {integrity: sha512-BzKoOYq6R6pwi0jvmzI9Yo6TM3u1BFiU3UCx8+78x6YNlUvz7LG4h5o0BZDsmq+AknGDH37T+vtnIs2vblhwKg==}
     hasBin: true
 
-  '@vuepress/client@2.0.0-rc.19':
-    resolution: {integrity: sha512-vUAU6n4qmtXqthxkb4LHq0D+VWSDenwBDf0jUs7RaBLuOVrbPtmH/hs4k1vLIlGdwC3Zs/G6tlB4UmuZiiwR8Q==}
-
   '@vuepress/client@2.0.0-rc.20':
     resolution: {integrity: sha512-rEye9BmaTK+WHeKv3tFTARhvgkHoai5Ajv9JCRvVCwotBXhLFR9p3us8hxcA94u6ts0TwJxsDzxv/wQQ+9v/PQ==}
 
@@ -708,9 +702,6 @@ packages:
     resolution: {integrity: sha512-fbai2TL8RmTTh77KBLk8Zpu4Fh4rc870/di5c/jBnuHlZhiGYqBIDmQrwV1ghRRMlnhgI+pl7Dyc0+EJJS60hg==}
     peerDependencies:
       vuepress: 2.0.0-rc.20
-
-  '@vuepress/shared@2.0.0-rc.19':
-    resolution: {integrity: sha512-xaDeZxX0Qetc2Y6/lrzO6M/40i3LmMm7Fk85bOftBBOaNehZ24RdsmIHBJDDv+bTUv+DBF++1/mOtbt6DBRzEA==}
 
   '@vuepress/shared@2.0.0-rc.20':
     resolution: {integrity: sha512-fMCJxO9tqEGZJ85cYLz4pIP6TnUpC7kUgGJtpSGivro0NA7tqTVv4MVQwQ5J3w4YkQfEJirhlAYEOTrlols52Q==}
@@ -1327,6 +1318,7 @@ packages:
   sitemap@8.0.0:
     resolution: {integrity: sha512-+AbdxhM9kJsHtruUF39bwS/B0Fytw6Fr1o4ZAIAEqA6cke2xcoO2GleBw9Zw7nRzILVEgz7zBM5GiTJjie1G9A==}
     engines: {node: '>=14.0.0', npm: '>=6.0.0'}
+    deprecated: 'SECURITY: Multiple vulnerabilities fixed in 8.0.1 (XML injection, path traversal, command injection, protocol injection). Upgrade immediately: npm install sitemap@8.0.1'
     hasBin: true
 
   slash@5.1.0:
@@ -1374,11 +1366,11 @@ packages:
   three-vue3@file:..:
     resolution: {directory: .., type: directory}
     peerDependencies:
-      three: '>=0.172.0'
+      three: '>=0.180.0'
       vue: '>=3.0.0'
 
-  three@0.173.0:
-    resolution: {integrity: sha512-AUwVmViIEUgBwxJJ7stnF0NkPpZxx1aZ6WiAbQ/Qq61h6I9UR4grXtZDmO8mnlaNORhHnIBlXJ1uBxILEKuVyw==}
+  three@0.184.0:
+    resolution: {integrity: sha512-wtTRjG92pM5eUg/KuUnHsqSAlPM296brTOcLgMRqEeylYTh/CdtvKUvCyyCQTzFuStieWxvZb8mVTMvdPyUpxg==}
 
   throttle-debounce@5.0.2:
     resolution: {integrity: sha512-B71/4oyj61iNH0KeCamLuE2rmKuTO5byTOSVwECM5FA7TiAiAW+UqTKZ9ERueC4qvgSttUhdmq1mXC3kJqGX7A==}
@@ -1495,6 +1487,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -2015,15 +2008,6 @@ snapshots:
       - supports-color
       - typescript
 
-  '@vuepress/client@2.0.0-rc.19':
-    dependencies:
-      '@vue/devtools-api': 7.7.2
-      '@vuepress/shared': 2.0.0-rc.19
-      vue: 3.5.13
-      vue-router: 4.5.0(vue@3.5.13)
-    transitivePeerDependencies:
-      - typescript
-
   '@vuepress/client@2.0.0-rc.20':
     dependencies:
       '@vue/devtools-api': 7.7.2
@@ -2203,10 +2187,6 @@ snapshots:
       vuepress: 2.0.0-rc.20(@vuepress/bundler-vite@2.0.0-rc.20(@types/node@22.13.5)(sass@1.85.0))(vue@3.5.13)
     transitivePeerDependencies:
       - typescript
-
-  '@vuepress/shared@2.0.0-rc.19':
-    dependencies:
-      '@mdit-vue/types': 2.1.0
 
   '@vuepress/shared@2.0.0-rc.20':
     dependencies:
@@ -2910,12 +2890,12 @@ snapshots:
     dependencies:
       copy-anything: 3.0.5
 
-  three-vue3@file:..(three@0.173.0)(vue@3.5.13):
+  three-vue3@file:..(three@0.184.0)(vue@3.5.13):
     dependencies:
-      three: 0.173.0
+      three: 0.184.0
       vue: 3.5.13
 
-  three@0.173.0: {}
+  three@0.184.0: {}
 
   throttle-debounce@5.0.2: {}
 

@@ -1,3 +1,21 @@
+## [0.1.0] - 2026-11-18
+
+### Added
+
+- Add geographic referencing, tile layers, GeoJSON objects, picking, parameter bus, camera fitting, and model rotation utilities.
+- Add rain, snow, water, water pool, sandy beach, and additional TSL effects with English and Chinese demos.
+
+### Modified
+
+- Align components, effects, documentation, and the agent skill with react-three-lite.
+- Update the three.js peer requirement to 0.180.0 or later and use npm OIDC trusted publishing for releases.
+
+### Fixed
+
+- Stabilize Sandy Beach WebGPU rendering and eliminate horizontal water bands.
+
+---
+
 ## [0.0.7] - 2026-03-29
 
 ### Added

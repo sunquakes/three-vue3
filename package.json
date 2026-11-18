@@ -1,7 +1,8 @@
 {
   "name": "three-vue3",
   "type": "module",
-  "version": "0.0.7",
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.17.0",
   "author": "Shing Rui <sunquakes@outlook.com>",
   "keywords": [
     "three.js",
@@ -29,22 +30,18 @@
     "test:unit": "vitest",
     "build-only": "vite build",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/",
-    "release": "node scripts/release.js",
-    "release:patch": "npm version patch && git push origin --tags",
-    "release:minor": "npm version minor && git push origin --tags",
-    "release:major": "npm version major && git push origin --tags"
+    "format": "prettier --write src/"
   },
   "peerDependencies": {
-    "vue": ">=3.0.0",
-    "three": ">=0.172.0"
+    "three": ">=0.180.0",
+    "vue": ">=3.0.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.10.5",
     "@tsconfig/node22": "^22.0.0",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^22.10.7",
-    "@types/three": "^0.172.0",
+    "@types/three": "^0.184.1",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
     "@typescript-eslint/parser": "^8.20.0",
     "@vitejs/plugin-vue": "^5.2.1",
@@ -58,6 +55,7 @@
     "jsdom": "^26.0.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.4.2",
+    "three": "^0.184.0",
     "typescript": "^5.7.3",
     "vite": "^6.0.7",
     "vite-plugin-dts": "^4.5.0",
