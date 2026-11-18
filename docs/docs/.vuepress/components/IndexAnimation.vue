@@ -1,5 +1,7 @@
 <template>
-  <tv-scene class="scene" :axes-helper="false" @created="created"></tv-scene>
+  <div class="index-animation">
+    <tv-scene class="scene" :axes-helper="false" @created="created"></tv-scene>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -10,6 +12,7 @@ let animation: Animation | undefined
 
 const created = async (scene, { camera }) => {
   camera.position.set(0, 1.5, 2.1)
+  camera.offsetLeft = 60
 
   // Load the animated model and play every clip.
   const model = await GLTFLoader('/models/perseverance-draco.glb', { draco: true })
@@ -29,10 +32,14 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
-.scene {
-  margin-top: 10px;
-  margin-bottom: 16px;
+.index-animation {
+  display: inline-block;
+  width: 310px;
+  height: 250px;
+}
+
+.index-animation .scene {
   width: 100%;
-  height: 225px;
+  height: 100%;
 }
 </style>

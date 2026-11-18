@@ -5,6 +5,12 @@ import { createWaterMaterial } from '../utils/WaterMaterial'
 import { createNoiseTexture, NOISE_TEXTURE_SIZE } from '../utils/WaterNoise'
 import { updateMirrorCamera } from '../utils/WaterReflection'
 import { OCEAN_WAVES, sampleOceanSurface } from '../utils/WaterSpectrum'
+import { resolveWaterPoolShape, sampleWaterPoolOutline } from '../utils/WaterPoolShape'
+import {
+  createWaterSurfaceGeometry,
+  getWaterOutlineSubdivisions,
+  resolveWaterSurfaceShape
+} from '../utils/WaterSurfaceGeometry'
 
 describe('WaterSpectrum', () => {
   it('defines a directional spectrum with normalized wave directions', () => {
@@ -168,5 +174,81 @@ describe('WaterReflection', () => {
     camera.updateMatrixWorld(true)
 
     expect(updateMirrorCamera(camera, mirror, mirrorCamera)).toBe(false)
+  })
+})
+
+describe('WaterSurfaceGeometry', () => {
+  const outline = resolveWaterPoolShape([
+    [-1, -0.5],
+    [1, -0.5],
+    [1, 0.5],
+    [-1, 0.5]
+  ])
+
+  it('spreads the boundary subdivision budget across all outline edges', () => {
+    expect(getWaterOutlineSubdivisions(160, outline)).toBe(40)
+    expect(getWaterOutlineSubdivisions(3, outline)).toBe(1)
+    expect(sampleWaterPoolOutline(outline, 40)).toHaveLength(160)
+  })
+
+  it('builds concentric rings with upward winding and an exact custom boundary', () => {
+    const geometry = createWaterSurfaceGeometry(16, outline)
+    const positions = geometry.getAttribute('position')
+    const indices = geometry.getIndex()
+    const boundary = sampleWaterPoolOutline(outline, 4)
+    const angular = boundary.length
+    const rings = Math.max(8, Math.round(16 / 4))
+
+    expect(positions.count).toBe(1 + angular * rings)
+    expect(indices).not.toBeNull()
+    expect(indices!.count % 3).toBe(0)
+    expect(positions.getX(0)).toBe(0)
+    expect(positions.getY(0)).toBe(0)
+    expect(positions.getZ(0)).toBe(0)
+
+    // The outer ring contains the outline vertices, preserving straight edges
+    // instead of approximating the custom shape with a rectangular plane.
+    const outerRing = 1 + (rings - 1) * angular
+    boundary.forEach(([x, z], index) => {
+      expect(positions.getX(outerRing + index)).toBeCloseTo(x, 6)
+      expect(positions.getY(outerRing + index)).toBe(0)
+      expect(positions.getZ(outerRing + index)).toBeCloseTo(z, 6)
+    })
+
+    for (let triangle = 0; triangle < indices!.count; triangle += 3) {
+      const a = indices!.getX(triangle)
+      const b = indices!.getX(triangle + 1)
+      const c = indices!.getX(triangle + 2)
+      const abx = positions.getX(b) - positions.getX(a)
+      const abz = positions.getZ(b) - positions.getZ(a)
+      const acx = positions.getX(c) - positions.getX(a)
+      const acz = positions.getZ(c) - positions.getZ(a)
+      // XZ cross products with this sign produce a +Y geometric normal.
+      expect(abz * acx - abx * acz).toBeGreaterThan(0)
+    }
+  })
+
+  it('accepts world-unit Water outlines without relaxing normalized WaterPool shapes', () => {
+    const worldOutline = resolveWaterSurfaceShape([
+      [-8, -2.5],
+      [-4.5, -5.5],
+      [1.5, -6],
+      [6.5, -3.5],
+      [8, 1],
+      [4.5, 5],
+      [-1.5, 5.5],
+      [-6.5, 3]
+    ])
+    const geometry = createWaterSurfaceGeometry(160, worldOutline)
+    geometry.computeBoundingBox()
+    const bounds = geometry.boundingBox!
+
+    expect(bounds.min.x).toBeCloseTo(-8, 6)
+    expect(bounds.max.x).toBeCloseTo(8, 6)
+    expect(bounds.min.z).toBeCloseTo(-6, 6)
+    expect(bounds.max.z).toBeCloseTo(5.5, 6)
+    expect(() => resolveWaterPoolShape(worldOutline)).toThrow('inside -1…1')
+
+    geometry.dispose()
   })
 })

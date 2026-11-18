@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { uniform } from 'three/tsl'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   WATER_POOL_FLOOR_Y,
   WATER_POOL_HALF_SIZE,
@@ -8,10 +8,15 @@ import {
 } from '../utils/WaterPoolSimulation'
 import { createWaterPoolMaterials } from '../utils/WaterPoolMaterials'
 import {
-  WATER_POOL_OUTLINE,
+  WATER_POOL_BOX_OUTLINE,
   clampToWaterPool,
+  convexHull2D,
+  createWaterPoolEdges,
+  getWaterPoolBounds,
   isInsideWaterPool,
-  sampleWaterPoolOutline
+  resolveWaterPoolShape,
+  sampleWaterPoolOutline,
+  WATER_POOL_IRREGULAR_CUBE_OUTLINE
 } from '../utils/WaterPoolShape'
 
 const createSimulation = () =>
@@ -44,6 +49,29 @@ describe('WaterPoolSimulation', () => {
     const average = bytes.reduce((sum, value) => sum + value, 0) / bytes.length
     expect(average).toBeGreaterThan(44)
     expect(average).toBeLessThan(60)
+  })
+
+  it('uses the reference water texture sampling settings', () => {
+    const simulation = createSimulation()
+
+    expect(simulation.waterTexture.name).toBe('WaterPoolState')
+    expect(simulation.waterTexture.minFilter).toBe(THREE.LinearFilter)
+    expect(simulation.waterTexture.magFilter).toBe(THREE.LinearFilter)
+    expect(simulation.waterTexture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(simulation.waterTexture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(simulation.waterTexture.generateMipmaps).toBe(false)
+
+    simulation.dispose()
+  })
+
+  it('disposes the GPU texture it owns', () => {
+    const simulation = createSimulation()
+    const onDispose = vi.fn()
+    simulation.waterTexture.addEventListener('dispose', onDispose)
+
+    simulation.dispose()
+
+    expect(onDispose).toHaveBeenCalledTimes(1)
   })
 
   it('raises the surface around a drop and propagates it to neighbours', () => {
@@ -164,36 +192,96 @@ describe('WaterPoolSimulation', () => {
 })
 
 describe('WaterPoolShape', () => {
-  it('keeps the irregular outline convex', () => {
-    WATER_POOL_OUTLINE.forEach((start, index) => {
-      const middle = WATER_POOL_OUTLINE[(index + 1) % WATER_POOL_OUTLINE.length]
-      const end = WATER_POOL_OUTLINE[(index + 2) % WATER_POOL_OUTLINE.length]
-      const cross =
-        (middle[0] - start[0]) * (end[1] - middle[1]) -
-        (middle[1] - start[1]) * (end[0] - middle[0])
+  it('keeps the built-in outlines convex', () => {
+    ;[WATER_POOL_BOX_OUTLINE, WATER_POOL_IRREGULAR_CUBE_OUTLINE].forEach((outline) => {
+      outline.forEach((start, index) => {
+        const middle = outline[(index + 1) % outline.length]
+        const end = outline[(index + 2) % outline.length]
+        const cross =
+          (middle[0] - start[0]) * (end[1] - middle[1]) -
+          (middle[1] - start[1]) * (end[0] - middle[0])
 
-      expect(cross).toBeGreaterThan(0)
+        expect(cross).toBeGreaterThan(0)
+        expect(isInsideWaterPool(0, 0, createWaterPoolEdges(outline))).toBe(true)
+      })
     })
   })
 
+  it('reduces unordered and duplicate outline points to their convex hull', () => {
+    const hull = convexHull2D([
+      [1, 1],
+      [-1, -1],
+      [1, -1],
+      [0, 0],
+      [-1, 1],
+      [1, 1]
+    ])
+
+    expect(hull).toEqual(WATER_POOL_BOX_OUTLINE)
+    expect(getWaterPoolBounds(hull)).toEqual({ minX: -1, maxX: 1, minZ: -1, maxZ: 1 })
+  })
+
+  it('resolves built-in, custom and geometry-based container shapes', () => {
+    expect(resolveWaterPoolShape('box')).toEqual(WATER_POOL_BOX_OUTLINE)
+    expect(resolveWaterPoolShape()).toEqual(WATER_POOL_IRREGULAR_CUBE_OUTLINE)
+
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute(
+        [-0.8, 0, -0.6, 0.7, 0.2, -0.5, 0.5, -0.1, 0.8, -0.6, 0.3, 0.7, 0, 0.5, 0],
+        3
+      )
+    )
+    expect(resolveWaterPoolShape(geometry)).toHaveLength(4)
+  })
+
+  it('rejects outlines that do not bound a normalized pool around the origin', () => {
+    expect(() =>
+      resolveWaterPoolShape([
+        [0, 0],
+        [1, 0]
+      ])
+    ).toThrow()
+    expect(() =>
+      resolveWaterPoolShape([
+        [0.2, 0.2],
+        [0.8, 0.2],
+        [0.8, 0.8],
+        [0.2, 0.8]
+      ])
+    ).toThrow()
+    expect(() =>
+      resolveWaterPoolShape([
+        [-2, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1]
+      ])
+    ).toThrow()
+  })
+
   it('tells inside points from points outside the basin', () => {
-    expect(isInsideWaterPool(0, 0)).toBe(true)
-    expect(isInsideWaterPool(0.95, 0.95)).toBe(false)
-    expect(isInsideWaterPool(-0.9, 0.1)).toBe(false)
+    const edges = createWaterPoolEdges(WATER_POOL_IRREGULAR_CUBE_OUTLINE)
+    expect(isInsideWaterPool(0, 0, edges)).toBe(true)
+    expect(isInsideWaterPool(0.95, 0.95, edges)).toBe(false)
+    expect(isInsideWaterPool(-0.99, 0.1, edges)).toBe(false)
   })
 
   it('pushes dragged boxes back inside the outline', () => {
-    const [x, z] = clampToWaterPool(0.95, 0.95, 0.1)
+    const edges = createWaterPoolEdges(WATER_POOL_IRREGULAR_CUBE_OUTLINE)
+    const [x, z] = clampToWaterPool(0.95, 0.95, edges, 0.1)
 
-    expect(isInsideWaterPool(x, z, 0.099)).toBe(true)
+    expect(isInsideWaterPool(x, z, edges, 0.099)).toBe(true)
   })
 
   it('samples the outline as a closed ring on the boundary', () => {
-    const points = sampleWaterPoolOutline(3)
+    const points = sampleWaterPoolOutline(WATER_POOL_IRREGULAR_CUBE_OUTLINE, 3)
+    const edges = createWaterPoolEdges(WATER_POOL_IRREGULAR_CUBE_OUTLINE)
 
-    expect(points).toHaveLength(WATER_POOL_OUTLINE.length * 3)
+    expect(points).toHaveLength(WATER_POOL_IRREGULAR_CUBE_OUTLINE.length * 3)
     points.forEach(([x, z]) => {
-      expect(isInsideWaterPool(x, z, -1e-4)).toBe(true)
+      expect(isInsideWaterPool(x, z, edges, -1e-4)).toBe(true)
     })
   })
 })
@@ -207,67 +295,30 @@ describe('WaterPoolMaterials', () => {
       THREE.RGBAFormat,
       THREE.HalfFloatType
     )
-    const causticTexture = new THREE.DataTexture(
-      new Uint8Array(4 * 4 * 4),
-      4,
-      4,
-      THREE.RGBAFormat,
-      THREE.UnsignedByteType
-    )
-    const tileTexture = new THREE.DataTexture(
-      new Uint8Array(4 * 4 * 4),
-      4,
-      4,
-      THREE.RGBAFormat,
-      THREE.UnsignedByteType
-    )
-
     const materials = createWaterPoolMaterials({
       waterTexture,
-      causticTexture,
-      tileTexture,
-      boxes: [
-        {
-          center: uniform(new THREE.Vector3(-0.4, -0.68, 0.2)),
-          halfSize: uniform(new THREE.Vector3(0.18, 0.18, 0.18)),
-          color: uniform(new THREE.Vector3(0.8, 0.6, 0.2))
-        }
-      ],
-      lightDirection: uniform(new THREE.Vector3(0.55, 0.9, 0.35).normalize())
+      lightDirection: uniform(new THREE.Vector3(0.55, 0.9, 0.35).normalize()),
+      poolCenter: uniform(new THREE.Vector3(2, 3, -1)),
+      poolScale: uniform(2.5)
     })
 
-    const dispose = () => {
-      materials.water.dispose()
-      materials.pool.dispose()
-      materials.boxes.forEach((material) => material.dispose())
-      materials.sky.dispose()
-      waterTexture.dispose()
-      causticTexture.dispose()
-      tileTexture.dispose()
+    return {
+      materials,
+      dispose: () => {
+        materials.water.dispose()
+        waterTexture.dispose()
+      }
     }
-
-    return { materials, dispose }
   }
 
-  it('builds node materials for the water, basin, boxes and sky', () => {
+  it('builds the single analytic, double-sided water surface', () => {
     const { materials, dispose } = createMaterials()
 
+    expect(Object.keys(materials)).toEqual(['water'])
     expect(materials.water.name).toBe('WaterPoolSurface')
     expect(materials.water.positionNode).toBeDefined()
     expect(materials.water.colorNode).toBeDefined()
     expect(materials.water.side).toBe(THREE.DoubleSide)
-
-    expect(materials.pool.name).toBe('WaterPoolBasin')
-    expect(materials.pool.colorNode).toBeDefined()
-    expect(materials.pool.side).toBe(THREE.DoubleSide)
-
-    expect(materials.boxes).toHaveLength(1)
-    expect(materials.boxes[0].name).toBe('WaterPoolBox')
-    expect(materials.boxes[0].colorNode).toBeDefined()
-
-    expect(materials.sky.name).toBe('WaterPoolSky')
-    expect(materials.sky.side).toBe(THREE.BackSide)
-    expect(materials.sky.depthWrite).toBe(false)
 
     dispose()
   })

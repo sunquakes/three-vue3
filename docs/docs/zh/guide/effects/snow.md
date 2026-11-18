@@ -104,37 +104,41 @@ onBeforeUnmount(() => {
 
 ## 属性
 
-| 名称                  | 类型                     | 默认值     | 描述                          |
-| --------------------- | ------------------------ | ---------- | ----------------------------- |
-| count                 | number                   | `3000`     | `可选` 雪花数量。              |
-| color                 | string \| number \| Color | `0xffffff` | `可选` 雪花颜色。              |
-| speed                 | number                   | `0.5`      | `可选` 下落速度系数。          |
-| range                 | number                   | `20`       | `可选` 循环盒体的水平尺寸。    |
-| height                | number                   | `15`       | `可选` 循环盒体的垂直尺寸。    |
-| windX                 | number                   | `0.2`      | `可选` X 轴风力漂移。          |
-| windZ                 | number                   | `0.1`      | `可选` Z 轴风力漂移。          |
-| turbulence            | number                   | `0.8`      | `可选` 阵风摇摆强度。          |
-| opacity               | number                   | `0.9`      | `可选` 雪花不透明度。          |
-| size                  | number                   | `1`        | `可选` 雪花尺寸系数。          |
-| accumulate            | boolean                  | `false`    | `可选` 让雪堆积在场景网格上。  |
-| accumulationTargets   | Object3D \| Object3D[]   | -          | `可选` 承接积雪的网格，默认整个场景。 |
-| accumulationThickness | number                   | `0.1`      | `可选` 积雪层的厚度。          |
-| accumulationDuration  | number                   | `6`        | `可选` 积雪达到最厚的秒数。    |
-| accumulationColor     | string \| number \| Color | `0xffffff` | `可选` 积雪颜色。              |
+| 名称                  | 类型                      | 默认值     | 描述                                  |
+| --------------------- | ------------------------- | ---------- | ------------------------------------- |
+| count                 | number                    | `3000`     | `可选` 雪花数量。                     |
+| color                 | string \| number \| Color | `0xffffff` | `可选` 雪花颜色。                     |
+| speed                 | number                    | `0.5`      | `可选` 下落速度系数。                 |
+| range                 | number                    | `20`       | `可选` 循环盒体的水平尺寸。           |
+| height                | number                    | `15`       | `可选` 循环盒体的垂直尺寸。           |
+| windX                 | number                    | `0.2`      | `可选` X 轴风力漂移。                 |
+| windZ                 | number                    | `0.1`      | `可选` Z 轴风力漂移。                 |
+| turbulence            | number                    | `0.8`      | `可选` 阵风摇摆强度。                 |
+| opacity               | number                    | `0.9`      | `可选` 雪花不透明度。                 |
+| size                  | number                    | `1`        | `可选` 雪花尺寸系数。                 |
+| accumulate            | boolean                   | `false`    | `可选` 让雪堆积在场景网格上。         |
+| accumulationTargets   | Object3D \| Object3D[]    | -          | `可选` 承接积雪的网格，默认整个场景。 |
+| accumulationThickness | number                    | `0.1`      | `可选` 积雪层的厚度。                 |
+| accumulationDuration  | number                    | `6`        | `可选` 积雪达到最厚的秒数。           |
+| accumulationColor     | string \| number \| Color | `0xffffff` | `可选` 积雪颜色。                     |
 
 ## 类用法
 
-独立的 `SnowEffect` 是轻量点云，雪花着色同样基于 TSL，但没有积雪过程；同样可在 WebGPU 与 WebGL 上运行。
+独立的 `SnowEffect` 使用与 `<tv-snow>` 相同的雪花精灵、阵风、循环、柔和淡出和可选积雪能力。它可在 WebGPU 与 WebGL 上运行，加入场景后会自动跟随相机并推进自身时钟。
 
 ```ts
 import { SnowEffect } from 'three-vue3'
 
-const snow = new SnowEffect({ count: 1200, size: 10 })
+const snow = new SnowEffect({
+  count: 1200,
+  size: 1,
+  accumulate: true,
+  accumulationDuration: 6
+})
 scene.add(snow.mesh)
 
-// 在渲染循环中：
-snow.update(delta)
-
-// 销毁时：
+// 无需逐帧更新。仅在需要手动驱动时间轴时调用 update(delta)，销毁时：
 snow.dispose()
 ```
+
+默认会在场景中所有符合条件的不透明网格上积雪。可通过 `accumulationTargets` 限定目标；`accumulationThickness`、`accumulationDuration` 和 `accumulationColor` 与组件同名属性一致。

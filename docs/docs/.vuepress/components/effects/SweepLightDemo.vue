@@ -16,7 +16,7 @@ const created = async (scene, { camera }) => {
   camera.position.set(0, 1.5, 3)
   camera.lookAt(0, 0, 0)
 
-  model = await GLTFLoader('/models/perseverance.glb', true)
+  model = await GLTFLoader('/models/perseverance-draco.glb', { draco: true })
   model.scale.set(0.8, 0.8, 0.8)
   scene.add(model)
 

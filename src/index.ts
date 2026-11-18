@@ -23,7 +23,9 @@ import Animation from './utils/Animation'
 // component
 export default {
   install: (app: App) => {
-    app.component('tv-scene', Scene)
+    if (!app.component('tv-scene')) {
+      app.component('tv-scene', Scene)
+    }
     app.component('tv-gltf-loader', GLTFLoader)
     app.component('tv-fbx-loader', FBXLoader)
     app.component('tv-obj-loader', OBJLoader)
@@ -98,7 +100,24 @@ export type { GlobalParameters } from './utils/ParameterBus'
 export { default as Water } from './components/Water'
 export type { WaterProps } from './components/Water'
 export { default as WaterPool } from './components/WaterPool'
-export type { WaterPoolProps, WaterPoolBoxConfig } from './components/WaterPool'
+export type { WaterPoolProps } from './components/WaterPool'
+export {
+  WATER_POOL_BOX_OUTLINE,
+  WATER_POOL_IRREGULAR_CUBE_OUTLINE,
+  clampToWaterPool,
+  convexHull2D,
+  createWaterPoolEdges,
+  getWaterPoolBounds,
+  isInsideWaterPool,
+  resolveWaterPoolShape,
+  sampleWaterPoolOutline
+} from './utils/WaterPoolShape'
+export type {
+  WaterPoolBounds,
+  WaterPoolEdge,
+  WaterPoolOutline,
+  WaterPoolShape
+} from './utils/WaterPoolShape'
 export { default as SandyBeach } from './components/SandyBeach'
 export { mountBeachScene } from './utils/BeachScene'
 export type { BeachSceneOptions } from './utils/BeachScene'

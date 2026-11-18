@@ -31,15 +31,10 @@ const created = (scene, { camera }) => {
   label.style.userSelect = 'none'
 
   // Start (anchor) on the box corner, end (label) out to the right.
-  // `autoAnchor` keeps the label's connection point facing the camera, and
-  // `attach(camera)` starts the internal animation loop.
   callout = new Callout([0.5, 0.5, 0.5], [1.5, 1.0, 0.5], label, {
     color: '#ffffff',
     lineWidth: 2,
     lineShape: 'broken',
-    bendAxis: 'x',
-    bendRatio: 2 / 3,
-    autoAnchor: true,
     dashed: false,
     showDot: true,
     dotColor: '#ffffff',

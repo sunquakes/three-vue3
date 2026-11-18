@@ -54,6 +54,7 @@ export class WaterPoolSimulation {
   readonly normalZ: Float32Array
   /** RGBA half float texels: height, velocity, normal.x, normal.z. */
   readonly waterTextureData: Uint16Array
+  readonly waterTexture: THREE.DataTexture
   /** RGBA caustic texels, the red channel stores light intensity / 2. */
   readonly causticTextureData: Uint8Array
 
@@ -99,6 +100,20 @@ export class WaterPoolSimulation {
     this.causticScratch = new Float32Array(causticCells)
 
     this.waterTextureData = new Uint16Array(cells * 4)
+    this.waterTexture = new THREE.DataTexture(
+      this.waterTextureData,
+      this.resolution,
+      this.resolution,
+      THREE.RGBAFormat,
+      THREE.HalfFloatType
+    )
+    this.waterTexture.name = 'WaterPoolState'
+    this.waterTexture.minFilter = THREE.LinearFilter
+    this.waterTexture.magFilter = THREE.LinearFilter
+    this.waterTexture.wrapS = THREE.ClampToEdgeWrapping
+    this.waterTexture.wrapT = THREE.ClampToEdgeWrapping
+    this.waterTexture.generateMipmaps = false
+    this.waterTexture.needsUpdate = true
     this.causticTextureData = new Uint8Array(causticCells * 4)
 
     this.spacing = (WATER_POOL_HALF_SIZE * 2) / (this.resolution - 1)
@@ -115,6 +130,7 @@ export class WaterPoolSimulation {
     this.updateNormals()
     this.updateCaustics()
     this.syncWaterTexture()
+    this.waterTexture.needsUpdate = true
   }
 
   /**
@@ -330,6 +346,13 @@ export class WaterPoolSimulation {
     this.fillCaustics(accum)
   }
 
+  /** Uploads the current height field and caustics. */
+  updateTexture(): void {
+    this.updateCaustics()
+    this.syncWaterTexture()
+    this.waterTexture.needsUpdate = true
+  }
+
   /** Copies the current state into the packed half float texture. */
   syncWaterTexture(): void {
     const data = this.waterTextureData
@@ -340,6 +363,10 @@ export class WaterPoolSimulation {
       data[offset + 2] = THREE.DataUtils.toHalfFloat(this.normalX[index])
       data[offset + 3] = THREE.DataUtils.toHalfFloat(this.normalZ[index])
     }
+  }
+
+  dispose(): void {
+    this.waterTexture.dispose()
   }
 
   /** Reads the surface height at a world position, used by tests and tooling. */

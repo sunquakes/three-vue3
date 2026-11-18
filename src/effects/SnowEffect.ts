@@ -1,152 +1,358 @@
 import * as THREE from 'three'
-import { PointsNodeMaterial } from 'three/webgpu'
+import { NodeMaterial } from 'three/webgpu'
 import {
   Fn,
-  attribute,
-  cos,
-  float,
-  length,
-  mod,
-  oneMinus,
-  positionGeometry,
-  modelViewMatrix,
-  pointUV,
-  sin,
-  smoothstep,
   uniform,
-  vec2,
+  float,
   vec3,
-  vec4
+  vec4,
+  uv,
+  attribute,
+  positionLocal,
+  modelViewMatrix,
+  cameraProjectionMatrix,
+  varying,
+  mod,
+  smoothstep,
+  oneMinus,
+  sin,
+  cos,
+  min,
+  max,
+  mx_noise_float,
+  texture,
+  viewportSize
 } from 'three/tsl'
+import { SnowCover } from '../utils/SnowCover'
 
 export interface SnowEffectOptions {
-  /** Number of flakes, default: 1500 */
+  /** Number of snowflakes, default: 3000 */
   count?: number
-  /** Fall speed in world units per second, default: 2 */
-  speed?: number
-  /** Horizontal half-extent of the snow volume, default: 40 */
-  range?: number
-  /** Vertical extent of the snow volume, default: 30 */
-  height?: number
-  /** Flake size, default: 8 */
-  size?: number
-  /** Sway amplitude in world units, default: 0.6 */
-  turbulence?: number
   /** Flake color, default: 0xffffff */
-  color?: number
+  color?: string | number | THREE.Color
+  /** Fall speed multiplier, default: 0.5 */
+  speed?: number
+  /** Width and depth of the snow volume, default: 20 */
+  range?: number
+  /** Height of the snow volume, default: 15 */
+  height?: number
+  /** Constant wind on the X axis, default: 0.2 */
+  windX?: number
+  /** Constant wind on the Z axis, default: 0.1 */
+  windZ?: number
+  /** Gust and flutter strength, default: 0.8 */
+  turbulence?: number
   /** Flake opacity, default: 0.9 */
   opacity?: number
-  /** Horizontal wind drift in world units per second, default: [0.5, 0] */
-  wind?: [number, number]
+  /** Flake size multiplier, default: 1 */
+  size?: number
+  /** Let snow settle on scene meshes, default: false */
+  accumulate?: boolean
+  /** Meshes that collect snow; defaults to every eligible mesh in the scene */
+  accumulationTargets?: THREE.Object3D | THREE.Object3D[]
+  /** Maximum settled snow thickness in world units, default: 0.1 */
+  accumulationThickness?: number
+  /** Seconds required to reach full thickness, default: 6 */
+  accumulationDuration?: number
+  /** Settled snow color, default: 0xffffff */
+  accumulationColor?: string | number | THREE.Color
+}
+
+function createFallbackTexture(): THREE.Texture {
+  const data = new Uint8Array([255, 255, 255, 255])
+  const fallback = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat)
+  fallback.needsUpdate = true
+  return fallback
+}
+
+function createSnowTexture(): THREE.Texture {
+  if (typeof document === 'undefined') return createFallbackTexture()
+
+  const size = 64
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return createFallbackTexture()
+
+  const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+  gradient.addColorStop(0, 'rgba(255,255,255,1)')
+  gradient.addColorStop(0.4, 'rgba(255,255,255,0.8)')
+  gradient.addColorStop(0.7, 'rgba(255,255,255,0.2)')
+  gradient.addColorStop(1, 'rgba(255,255,255,0)')
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, 0, size, size)
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)'
+  ctx.lineWidth = 2
+  ctx.lineCap = 'round'
+
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * Math.PI) / 3
+    const cosAngle = Math.cos(angle)
+    const sinAngle = Math.sin(angle)
+
+    ctx.beginPath()
+    ctx.moveTo(32, 32)
+    ctx.lineTo(32 + cosAngle * 26, 32 + sinAngle * 26)
+    ctx.stroke()
+
+    for (const distance of [10, 18]) {
+      const bx = 32 + cosAngle * distance
+      const by = 32 + sinAngle * distance
+      const branchAngle = Math.PI / 6
+      const branchLength = 5
+
+      for (const sign of [-1, 1]) {
+        const ba = angle + sign * branchAngle
+        ctx.beginPath()
+        ctx.moveTo(bx, by)
+        ctx.lineTo(bx + Math.cos(ba) * branchLength, by + Math.sin(ba) * branchLength)
+        ctx.stroke()
+      }
+    }
+  }
+
+  return new THREE.CanvasTexture(canvas)
 }
 
 /**
- * Lightweight snowfall built from a single `THREE.Points` cloud. Flakes fall,
- * drift with wind and sway on individual phases, wrapping inside a box volume.
- *
- * Built entirely with TSL, so it renders on both `WebGPURenderer` and a classic
- * `WebGLRenderer` (through three's `WebGLNodesHandler`).
+ * Reference-matched GPU snowfall using instanced, camera-facing snowflake
+ * quads. Flake motion, fading and perspective size are evaluated in TSL; the
+ * class advances its own clock once added to a scene. update(delta) remains
+ * available when a caller needs to drive the timeline explicitly.
  */
 export default class SnowEffect {
-  readonly mesh: THREE.Points<THREE.BufferGeometry, PointsNodeMaterial>
-
-  private time = 0
-  private uTime = uniform(0)
+  readonly mesh: THREE.Mesh<THREE.InstancedBufferGeometry, NodeMaterial>
+  private readonly material: NodeMaterial
+  private readonly snowTexture: THREE.Texture
+  private readonly timeUniform = uniform(0)
+  private readonly options: SnowEffectOptions
+  private cover: SnowCover | null = null
+  private coverScene: THREE.Scene | null = null
+  private animationId: number | null = null
+  private lastTime = 0
+  private disposed = false
 
   constructor(options: SnowEffectOptions = {}) {
+    this.options = { ...options }
     const {
-      count = 1500,
-      speed = 2,
-      range = 40,
-      height = 30,
-      size = 8,
-      turbulence = 0.6,
-      color = 0xffffff,
+      count = 3000,
+      color: flakeColor = 0xffffff,
+      speed = 0.5,
+      range = 20,
+      height = 15,
+      windX = 0.2,
+      windZ = 0.1,
+      turbulence = 0.8,
       opacity = 0.9,
-      wind = [0.5, 0]
+      size = 1
     } = options
 
-    const positions = new Float32Array(count * 3)
-    const seeds = new Float32Array(count)
+    const geometry = new THREE.InstancedBufferGeometry()
+    geometry.instanceCount = count
+
+    geometry.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([-0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, 0.5, 0], 3)
+    )
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2))
+    geometry.setIndex([0, 1, 2, 0, 2, 3])
+
+    const offsets = new Float32Array(count * 3)
+    const scales = new Float32Array(count * 3)
+    const rotations = new Float32Array(count * 3)
 
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() * 2 - 1) * range
-      positions[i * 3 + 1] = Math.random() * height
-      positions[i * 3 + 2] = (Math.random() * 2 - 1) * range
-      seeds[i] = Math.random()
+      offsets[i * 3] = (Math.random() - 0.5) * range
+      offsets[i * 3 + 1] = Math.random() * height
+      offsets[i * 3 + 2] = (Math.random() - 0.5) * range
+
+      scales[i * 3] = (0.028 + Math.random() * 0.047) * size
+      scales[i * 3 + 1] = scales[i * 3]
+      scales[i * 3 + 2] = 1
+
+      rotations[i * 3] = Math.random() * Math.PI * 2
+      rotations[i * 3 + 1] = 0.5 + Math.random() * 2
+      rotations[i * 3 + 2] = Math.random()
     }
 
-    const geometry = new THREE.BufferGeometry()
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    geometry.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1))
+    geometry.setAttribute('aOffset', new THREE.InstancedBufferAttribute(offsets, 3))
+    geometry.setAttribute('aScale', new THREE.InstancedBufferAttribute(scales, 3))
+    geometry.setAttribute('aRotation', new THREE.InstancedBufferAttribute(rotations, 3))
 
-    const uSpeed = uniform(speed)
-    const uRange = uniform(range)
-    const uHeight = uniform(height)
-    const uTime = uniform(0)
-    const uSize = uniform(size)
-    const uTurbulence = uniform(turbulence)
-    const uWind = uniform(new THREE.Vector2(wind[0], wind[1]))
-    const uPixelRatio = uniform(Math.min(window.devicePixelRatio || 1, 2))
-    const uColor = uniform(new THREE.Color(color))
+    const uTime = this.timeUniform
+    const uColor = uniform(new THREE.Color(flakeColor))
     const uOpacity = uniform(opacity)
+    const uSizeScale = uniform(1)
+    const uHeight = uniform(height)
 
-    const material = new PointsNodeMaterial()
-    material.transparent = true
-    material.depthWrite = false
+    this.snowTexture = createSnowTexture()
+    this.material = new NodeMaterial()
+    this.material.transparent = true
+    this.material.depthWrite = false
+    this.material.side = THREE.DoubleSide
+    this.material.blending = THREE.NormalBlending
 
-    const animatedPosition = Fn(() => {
-      const aSeed = attribute<'float'>('aSeed', 'float')
-      const p = positionGeometry
+    const vAlpha = varying(float(0), 'vAlpha')
+    const vScaleY = varying(float(1), 'vScaleY')
 
-      const fallSpeed = uSpeed.mul(float(0.6).add(aSeed.mul(0.8)))
-      const y = mod(p.y.sub(uTime.mul(fallSpeed)), uHeight)
+    this.material.vertexNode = Fn(() => {
+      const offset = attribute<'vec3'>('aOffset', 'vec3')
+      const scale = attribute<'vec3'>('aScale', 'vec3')
+      const rotation = attribute<'vec3'>('aRotation', 'vec3')
 
-      const xz = mod(p.xz.add(uWind.mul(uTime)).add(uRange.mul(2.0)), uRange.mul(2.0)).sub(
-        uRange
+      const phase = rotation.z
+      const fallSpeed = phase.mul(0.8).add(0.6).mul(speed)
+      const fallDistance = uTime.mul(fallSpeed).mul(3)
+      const yRaw = offset.y.sub(fallDistance)
+      const y = mod(yRaw, uHeight)
+      const normY = y.div(uHeight)
+
+      const fadeIn = smoothstep(float(0.92), float(1.0), normY)
+      const fadeOut = oneMinus(smoothstep(float(0.0), float(0.06), normY))
+      vAlpha.assign(fadeIn.mul(fadeOut))
+      vScaleY.assign(scale.y)
+
+      const windDrift = uTime.mul(windX)
+      const windDriftZ = uTime.mul(windZ)
+
+      const noiseCoord = vec3(
+        offset.x.mul(0.15),
+        uTime.mul(0.3).add(phase.mul(10)),
+        offset.z.mul(0.15)
       )
+      const gust = mx_noise_float(noiseCoord).mul(turbulence)
+      const gustZ = mx_noise_float(noiseCoord.add(vec3(31.7, 0, 17.3))).mul(turbulence)
 
-      // Each flake sways on its own phase instead of falling in a straight line.
-      const phase = aSeed.mul(6.2831853)
-      const x = xz.x.add(sin(uTime.mul(1.3).add(phase)).mul(uTurbulence))
-      const z = xz.y.add(cos(uTime.mul(1.1).add(phase.mul(1.7))).mul(uTurbulence))
+      const swayX = sin(uTime.mul(rotation.y).add(rotation.x)).mul(0.35).mul(turbulence)
+      const swayZ = cos(uTime.mul(rotation.y).add(rotation.x).mul(0.7)).mul(0.25).mul(turbulence)
 
-      return vec3(x, y, z)
+      const xRaw = offset.x.add(windDrift).add(swayX).add(gust)
+      const zRaw = offset.z.add(windDriftZ).add(swayZ).add(gustZ)
+      const x = mod(xRaw.add(range / 2), float(range)).sub(range / 2)
+      const z = mod(zRaw.add(range / 2), float(range)).sub(range / 2)
+
+      const center = vec3(x, y, z)
+      const localPos = vec3(positionLocal.x.mul(scale.x), positionLocal.y.mul(scale.y), 0)
+
+      const spinAngle = uTime.mul(rotation.y.mul(0.4)).add(rotation.x)
+      const cosSpin = cos(spinAngle)
+      const sinSpin = sin(spinAngle)
+      const spunX = localPos.x.mul(cosSpin).sub(localPos.y.mul(sinSpin))
+      const spunY = localPos.x.mul(sinSpin).add(localPos.y.mul(cosSpin))
+      const spun = vec3(spunX, spunY, 0)
+
+      const viewCenter = modelViewMatrix.mul(vec4(center, 1.0))
+      const viewPos = viewCenter.xyz.add(spun)
+      const clip = cameraProjectionMatrix.mul(vec4(viewPos, 1.0))
+
+      const screenSize = viewportSize
+      const pixelSize = max(spunY.abs().mul(uSizeScale), float(0.001))
+      const minPixel = float(0.8)
+      const pixelCorrection = max(minPixel.div(pixelSize.mul(screenSize.y).mul(0.5)), float(1.0))
+      const scaleCorr = min(pixelCorrection, float(30.0))
+
+      const correctedSpun = vec3(spunX.mul(scaleCorr), spunY.mul(scaleCorr), 0)
+      const correctedView = viewCenter.xyz.add(correctedSpun)
+      return cameraProjectionMatrix.mul(vec4(correctedView, 1.0))
     })()
 
-    material.positionNode = animatedPosition
-
-    material.sizeNode = Fn(() => {
-      const aSeed = attribute<'float'>('aSeed', 'float')
-      const viewPosition = modelViewMatrix.mul(vec4(animatedPosition, 1.0))
-      return uSize
-        .mul(float(0.6).add(aSeed.mul(0.8)))
-        .mul(uPixelRatio)
-        .mul(float(10.0).div(viewPosition.z.negate()))
+    this.material.fragmentNode = Fn(() => {
+      const texColor = texture(this.snowTexture, uv())
+      const alpha = texColor.a.mul(vAlpha).mul(uOpacity)
+      const finalColor = texColor.rgb.mul(uColor)
+      return vec4(finalColor, alpha)
     })()
 
-    // Soft radial sprite.
-    material.colorNode = uColor
-    material.opacityNode = Fn(() => {
-      // `pointUV` is a vec2 node at runtime; its typings omit the vec2 node extensions.
-      // @ts-expect-error PointUVNode typings are missing the vec2 extensions
-      const dist = length(vec2(pointUV).sub(vec2(0.5, 0.5)).mul(2.0))
-      return oneMinus(smoothstep(float(0.6), float(1.0), dist)).mul(uOpacity)
-    })()
-
-    this.mesh = new THREE.Points(geometry, material)
+    this.mesh = new THREE.Mesh(geometry, this.material)
+    this.mesh.name = 'SnowEffect'
     this.mesh.frustumCulled = false
-    this.uTime = uTime
+    this.mesh.raycast = () => undefined
+    this.mesh.onBeforeRender = (renderer, scene, camera) => {
+      this.mesh.position.set(camera.position.x, 0, camera.position.z)
+      this.ensureCover(scene, renderer)
+    }
+    this.mesh.addEventListener('added', this.handleAdded)
+    this.mesh.addEventListener('removed', this.handleRemoved)
   }
 
   update(delta: number): void {
-    this.time += delta
-    this.uTime.value = this.time
+    if (this.disposed || !Number.isFinite(delta) || delta <= 0) return
+    this.timeUniform.value += delta
+    this.cover?.update(delta)
   }
 
   dispose(): void {
-    this.mesh.removeFromParent()
+    if (this.disposed) return
+    this.disposed = true
+    this.stopAnimation()
+    this.cover?.dispose()
+    this.cover = null
+    this.coverScene = null
+    this.mesh.removeEventListener('added', this.handleAdded)
+    this.mesh.removeEventListener('removed', this.handleRemoved)
     this.mesh.geometry.dispose()
-    this.mesh.material.dispose()
+    this.material.dispose()
+    this.snowTexture.dispose()
+    this.mesh.removeFromParent()
+  }
+
+  private ensureCover(scene: THREE.Scene, renderer: THREE.WebGLRenderer): void {
+    if (
+      !this.options.accumulate ||
+      this.disposed ||
+      (this.cover !== null && this.coverScene === scene)
+    ) {
+      return
+    }
+
+    this.cover?.dispose()
+    this.coverScene = scene
+    this.cover = new SnowCover({
+      scene,
+      targets: this.options.accumulationTargets,
+      thickness: this.options.accumulationThickness,
+      duration: this.options.accumulationDuration,
+      color: this.options.accumulationColor,
+      renderer: renderer as THREE.WebGLRenderer & { isWebGPURenderer?: boolean }
+    })
+  }
+
+  private handleAdded = (): void => {
+    this.startAnimation()
+  }
+
+  private handleRemoved = (): void => {
+    this.stopAnimation()
+  }
+
+  private startAnimation(): void {
+    if (this.disposed || this.animationId !== null || typeof requestAnimationFrame !== 'function') {
+      return
+    }
+
+    this.lastTime = performance.now()
+    this.animationId = requestAnimationFrame(this.tick)
+  }
+
+  private stopAnimation(): void {
+    if (this.animationId === null) return
+    cancelAnimationFrame(this.animationId)
+    this.animationId = null
+  }
+
+  private tick = (): void => {
+    this.animationId = null
+    if (this.disposed) return
+
+    const now = performance.now()
+    const delta = Math.min((now - this.lastTime) / 1000, 0.1)
+    this.lastTime = now
+    this.update(delta)
+
+    if (!this.disposed && this.mesh.parent) {
+      this.animationId = requestAnimationFrame(this.tick)
+    }
   }
 }

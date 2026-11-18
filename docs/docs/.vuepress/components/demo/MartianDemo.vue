@@ -86,6 +86,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'caption', text: string): void
+  (event: 'caption-opacity', opacity: number): void
   (event: 'pip-opacity', opacity: number): void
 }>()
 
@@ -595,6 +596,7 @@ const sceneSlotProps = useScene()
 let disposed = false
 let previousTime: number | null = null
 let lastCaption = ''
+let lastCaptionOpacity = -1
 let lastPipOpacity = -1
 let lastLoupeOpacity = 0
 
@@ -644,10 +646,9 @@ function updateMove(state: DriveState, now: number, dt: number) {
   const tween = state.tween
   if (!tween || state.paused) return
   const t = THREE.MathUtils.clamp((now - tween.startedAt) / tween.duration, 0, 1)
-  const eased = t * t * (3 - 2 * t)
   const group = state.roverGroup
-  group.position.x = THREE.MathUtils.lerp(tween.fromX, tween.toX, eased)
-  group.position.z = THREE.MathUtils.lerp(tween.fromZ, tween.toZ, eased)
+  group.position.x = THREE.MathUtils.lerp(tween.fromX, tween.toX, t)
+  group.position.z = THREE.MathUtils.lerp(tween.fromZ, tween.toZ, t)
 
   const targetHeading = Math.atan2(tween.toX - tween.fromX, tween.toZ - tween.fromZ)
   const delta = Math.atan2(
@@ -715,6 +716,12 @@ function emitCaption(text: string) {
   if (text === lastCaption) return
   lastCaption = text
   emit('caption', text)
+}
+
+function emitCaptionOpacity(opacity: number) {
+  if (opacity === lastCaptionOpacity) return
+  lastCaptionOpacity = opacity
+  emit('caption-opacity', opacity)
 }
 
 function emitPipOpacity(opacity: number) {
@@ -894,6 +901,7 @@ function handleFrame() {
   }
 
   let caption = props.captions.intro
+  let captionOpacity = 1
   let targetPipOpacity = 0
 
   if (state && state.ready) {
@@ -907,11 +915,13 @@ function handleFrame() {
       caption = props.captions.finding
     } else {
       caption = props.captions.downlink
+      captionOpacity = 0.95
       targetPipOpacity = 1
     }
   }
 
   emitCaption(caption)
+  emitCaptionOpacity(captionOpacity)
   emitPipOpacity(targetPipOpacity)
 }
 
@@ -922,10 +932,12 @@ function setupScene(sceneRef: THREE.Scene, parts: SceneParts) {
   const sunDirection = new THREE.Vector3(...SUN_DIRECTION).normalize()
   const earthDirection = new THREE.Vector3(...EARTH_DIRECTION).normalize()
   const wheelCenters = WHEEL_CENTERS.map(([x, y, z]) => new THREE.Vector3(x, y, z))
-  const driveCurve = new THREE.CatmullRomCurve3(
-    DRIVE_POINTS.map(([x, z]) => new THREE.Vector3(x, 0, z))
-  )
-  const driveStart = driveCurve.points[0]
+  const drivePoints = DRIVE_POINTS.map(([x, z]) => new THREE.Vector3(x, 0, z))
+  const driveCurve = new THREE.CurvePath<THREE.Vector3>()
+  for (let i = 1; i < drivePoints.length; i += 1) {
+    driveCurve.add(new THREE.LineCurve3(drivePoints[i - 1], drivePoints[i]))
+  }
+  const driveStart = drivePoints[0]
 
   globalParameterBus.set('sunDirection', sunDirection)
 
@@ -934,8 +946,8 @@ function setupScene(sceneRef: THREE.Scene, parts: SceneParts) {
     camera.position.set(14, 6.5, 9)
     camera.lookAt(-2, 0.9, -12.5)
     if (camera instanceof THREE.PerspectiveCamera) {
-      camera.fov = 50
-      camera.far = 1200
+      camera.fov = 75
+      camera.far = 1000
       camera.updateProjectionMatrix()
     }
   }

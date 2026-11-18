@@ -26,7 +26,7 @@ title: 地理参考系
 
 ## 默认用法
 
-<GeoObjectDemo />
+<GeoReferenceDemo />
 
 ::: details 点击我查看代码
 
@@ -38,63 +38,65 @@ title: 地理参考系
     :origin="ORIGIN"
     :grid-helper="GRID"
     @created="created"
-  >
-    <GeoObject
-      v-for="(marker, index) in MARKERS"
-      :key="index"
-      :coordinate="marker"
-      datum="GCJ02"
-      :object="anchors[index]"
-    />
-  </tv-scene>
+  />
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, shallowRef } from 'vue'
+import { onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
-import { GeoObject } from 'three-vue3'
 import type { GeoPoint } from 'three-vue3'
 
-const ORIGIN: GeoPoint = { lng: 116.391, lat: 39.907 }
-const GRID = { size: 1400, divisions: 28, colorCenterLine: 0x4a6fa5, colorGrid: 0x2f3e5c }
-const MARKERS: GeoPoint[] = [
-  { lng: 116.397428, lat: 39.90923 },
-  { lng: 116.4005, lat: 39.9117 },
-  { lng: 116.3945, lat: 39.912 }
+// 北京天安门（WGS84）。
+const ORIGIN: GeoPoint = { lng: 116.397, lat: 39.909 }
+const GRID = { size: 1200, divisions: 24, colorCenterLine: 0x4a6fa5, colorGrid: 0x2f3e5c }
+
+const PLACES: { point: GeoPoint; color: number }[] = [
+  { point: ORIGIN, color: 0xffd166 },
+  { point: { lng: 116.4005, lat: 39.909 }, color: 0x4fc3f7 },
+  { point: { lng: 116.397, lat: 39.9117 }, color: 0x81c784 },
+  { point: { lng: 116.3935, lat: 39.9063 }, color: 0xe57373 }
 ]
 
-const anchors = shallowRef<THREE.Object3D[]>([])
+const objects: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>[] = []
+let disposed = false
 
-const created = (scene, { camera }) => {
-  // scene 直接识别局部米制视点，并自行投影地理坐标。
-  scene.setPosition(camera, { x: 0, y: 750, z: 1000 })
+const created = (scene: THREE.Scene, { camera }: { camera: THREE.Camera }) => {
+  if (disposed) return
+
+  scene.setPosition(camera, { x: 0, y: 500, z: 700 })
   camera.lookAt(0, 0, 0)
 
-  // 所有物体都在 created 回调中创建，GeoObject 再通过 scene 自身的参考系投影定位。
-  anchors.value = MARKERS.map(() => {
-    const anchor = new THREE.Group()
-    const cone = new THREE.Mesh(
-      new THREE.ConeGeometry(40, 120, 24),
-      new THREE.MeshBasicMaterial({ color: 0xffd166 })
-    )
-    cone.position.y = 60
-    anchor.add(cone)
-    return anchor
+  PLACES.forEach(({ point, color }) => {
+    const radius = 35
+    const geometry = new THREE.SphereGeometry(radius, 24, 16)
+    const material = new THREE.MeshBasicMaterial({ color })
+    const marker = new THREE.Mesh(geometry, material)
+    scene.setPosition(marker, point)
+    marker.position.y = radius
+    scene.add(marker)
+    objects.push(marker)
   })
 }
 
 onBeforeUnmount(() => {
-  anchors.value.forEach((anchor) => {
-    anchor.removeFromParent()
-    anchor.traverse((child) => {
-      const mesh = child as THREE.Mesh
-      mesh.geometry?.dispose()
-      ;(mesh.material as THREE.Material | undefined)?.dispose()
-    })
+  disposed = true
+  objects.forEach((object) => {
+    object.removeFromParent()
+    object.geometry.dispose()
+    object.material.dispose()
   })
-  anchors.value = []
+  objects.length = 0
 })
 </script>
+
+<style>
+.scene {
+  margin-top: 10px;
+  margin-bottom: 16px;
+  width: 100%;
+  height: 300px;
+}
+</style>
 ```
 
 :::

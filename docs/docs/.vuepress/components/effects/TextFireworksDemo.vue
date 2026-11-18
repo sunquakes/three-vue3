@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="toolbar">
-      <input v-model="text" class="input" placeholder="Type a sentence" @keyup.enter="launch" />
+      <input v-model="text" class="input" placeholder="Type a sentence" />
       <button type="button" class="button" @click="launch">Launch</button>
     </div>
     <tv-scene class="scene" bg-color="rgb(40, 42, 54)" @created="created"></tv-scene>

@@ -27,7 +27,7 @@ importers:
         specifier: ^0.184.0
         version: 0.184.0
       three-vue3:
-        specifier: file:../
+        specifier: file:..
         version: file:..(three@0.184.0)(vue@3.5.13)
       vue:
         specifier: ^3.4.0

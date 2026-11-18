@@ -50,9 +50,19 @@ const created = (_scene, { camera }) => {
 
 Pass a grayscale `heightMap` and drops stop at the surface instead of falling through it. Each impact spawns an expanding ripple, so rain reads as hitting the ground. The map covers `heightMapSize` world units centred on the origin and is sampled like a plane's UVs (`u = x / size + 0.5`, `v = 0.5 - z / size`), so terrain displaced by the same image lines up exactly with the impacts.
 
+The live example generates a deterministic `256 × 256` value-noise height field and shares it between the displaced terrain, rain collisions, and ripples.
+
+<RainCollisionDemo />
+
 ```vue
 <template>
-  <tv-scene class="scene" bg-color="rgb(28, 30, 40)" :axes-helper="false" @created="created">
+  <tv-scene
+    class="scene"
+    bg-color="rgb(28, 30, 40)"
+    :axes-helper="false"
+    :grid-helper="false"
+    @created="created"
+  >
     <tv-rain
       v-if="heightMap"
       :count="5000"
@@ -126,7 +136,7 @@ const created = (scene, { camera, controls }) => {
 </script>
 ```
 
-Set `splash={false}` to keep the collision but skip the ripples, and use `splashColor`, `splashSize` and `splashDuration` to tune them.
+Set `:splash="false"` to keep the collision but skip the ripples, and use `splashColor`, `splashSize` and `splashDuration` to tune them.
 
 ## Props
 

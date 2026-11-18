@@ -50,9 +50,19 @@ const created = (_scene, { camera }) => {
 
 传入灰度 `heightMap` 后，雨滴会停在表面而不是穿透下去，每次落地都会生成一圈扩散的涟漪，让雨看起来真正打在表面上。贴图覆盖以原点为中心、边长为 `heightMapSize` 的世界范围，并按平面的 UV 采样（`u = x / size + 0.5`，`v = 0.5 - z / size`），所以用同一张图位移的地形与落点完全对齐。
 
+实时示例生成确定性的 `256 × 256` 值噪声高度场，并将其同时用于地形位移、雨滴碰撞和涟漪。
+
+<RainCollisionDemo />
+
 ```vue
 <template>
-  <tv-scene class="scene" bg-color="rgb(28, 30, 40)" :axes-helper="false" @created="created">
+  <tv-scene
+    class="scene"
+    bg-color="rgb(28, 30, 40)"
+    :axes-helper="false"
+    :grid-helper="false"
+    @created="created"
+  >
     <tv-rain
       v-if="heightMap"
       :count="5000"
@@ -126,7 +136,7 @@ const created = (scene, { camera, controls }) => {
 </script>
 ```
 
-设置 `splash={false}` 可保留碰撞但关闭涟漪，`splashColor`、`splashSize`、`splashDuration` 用于调整涟漪。
+设置 `:splash="false"` 可保留碰撞但关闭涟漪，`splashColor`、`splashSize`、`splashDuration` 用于调整涟漪。
 
 ## 属性
 

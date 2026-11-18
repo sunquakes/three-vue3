@@ -1,7 +1,7 @@
 <!--
   `/demo` page shell. It mounts the Martian scene and lays out the r3l
-  overlays: the info card, the WebGPU/WebGL switch, the caption line, the
-  orbit hint, the credits and the DSN downlink monitor.
+  overlays: the compact Home link, the WebGPU/WebGL switch, the caption line,
+  the orbit hint and the DSN downlink monitor.
 -->
 <template>
   <main class="demo-page">
@@ -14,19 +14,12 @@
       <MartianDemo
         :captions="captions"
         @caption="caption = $event"
+        @caption-opacity="captionOpacity = $event"
         @pip-opacity="pipOpacity = $event"
       />
     </tv-scene>
 
-    <section class="demo-panel demo-panel--info">
-      <a class="demo-back" :href="props.docsLink">← Back to Guide</a>
-      <h1 class="demo-title">A Martian Adventure</h1>
-      <p class="demo-blurb">
-        Qiusuo the rover rolls across the rust-red dunes toward an impact crater, parks at the rim
-        beside the Deep Space Network relay station, and streams its data toward the pale blue Earth
-        in the black sky, while a fern patch opens up in the regolith beside it.
-      </p>
-    </section>
+    <a class="demo-panel demo-home" :href="homeLink">← Home</a>
 
     <div class="demo-panel demo-panel--switch">
       <button
@@ -47,11 +40,9 @@
       </button>
     </div>
 
-    <div class="demo-caption">{{ caption }}</div>
+    <div class="demo-caption" :style="{ opacity: captionOpacity }">{{ caption }}</div>
 
     <div class="demo-panel demo-panel--hint">Drag to orbit · Scroll to zoom</div>
-
-    <div class="demo-credits">3D models: NASA/JPL-Caltech · fern patch by Poly Haven (CC0)</div>
 
     <DownlinkMonitor :opacity="pipOpacity" />
   </main>
@@ -73,13 +64,14 @@ interface MartianCaptions {
   downlink: string
 }
 
-const props = defineProps<{
+const { homeLink } = defineProps<{
   homeLink?: string
   docsLink?: string
   aiLink?: string
 }>()
 
 const caption = ref('')
+const captionOpacity = ref(1)
 const pipOpacity = ref(0)
 
 const captions: MartianCaptions = {
@@ -119,41 +111,20 @@ const captions: MartianCaptions = {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-.demo-panel--info {
+.demo-home {
   position: absolute;
   top: 24px;
   left: 24px;
   z-index: 1000;
-  padding: 16px 20px;
-  max-width: 330px;
-  pointer-events: auto;
-}
-
-.demo-back {
   display: inline-block;
-  margin-bottom: 10px;
+  padding: 16px 20px;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;
   color: #ffb066;
-}
-
-.demo-title {
-  margin: 0;
-  font-size: 26px;
-  line-height: 1.15;
-  font-weight: 800;
-  color: #ffe3c4;
-  letter-spacing: 0.01em;
-}
-
-.demo-blurb {
-  margin: 8px 0 0;
-  font-size: 13px;
-  line-height: 1.55;
-  color: #d8b59a;
+  pointer-events: auto;
 }
 
 .demo-panel--switch {
@@ -191,7 +162,7 @@ const captions: MartianCaptions = {
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  max-width: min(90vw, 720px);
+  max-width: min(720px, calc(100vw - 48px));
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -199,7 +170,8 @@ const captions: MartianCaptions = {
   text-align: center;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
   pointer-events: none;
-  white-space: nowrap;
+  white-space: normal;
+  transition: opacity 450ms ease;
 }
 
 .demo-panel--hint {
@@ -213,15 +185,6 @@ const captions: MartianCaptions = {
   letter-spacing: 0.04em;
   color: rgba(232, 196, 166, 0.85);
   white-space: nowrap;
-}
-
-.demo-credits {
-  position: absolute;
-  bottom: 20px;
-  right: 24px;
-  z-index: 1000;
-  font-size: 11px;
-  color: rgba(232, 196, 166, 0.7);
-  text-align: right;
+  pointer-events: none;
 }
 </style>

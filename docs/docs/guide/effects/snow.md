@@ -104,37 +104,42 @@ onBeforeUnmount(() => {
 
 ## Props
 
-| Name                  | Type                     | Default    | Description                                                       |
-| --------------------- | ------------------------ | ---------- | ----------------------------------------------------------------- |
-| count                 | number                   | `3000`     | `optional` Number of flakes.                                      |
+| Name                  | Type                      | Default    | Description                                                       |
+| --------------------- | ------------------------- | ---------- | ----------------------------------------------------------------- |
+| count                 | number                    | `3000`     | `optional` Number of flakes.                                      |
 | color                 | string \| number \| Color | `0xffffff` | `optional` Flake color.                                           |
-| speed                 | number                   | `0.5`      | `optional` Falling speed multiplier.                              |
-| range                 | number                   | `20`       | `optional` Horizontal size of the wrapping box.                   |
-| height                | number                   | `15`       | `optional` Vertical size of the wrapping box.                     |
-| windX                 | number                   | `0.2`      | `optional` Wind drift on the X axis.                              |
-| windZ                 | number                   | `0.1`      | `optional` Wind drift on the Z axis.                              |
-| turbulence            | number                   | `0.8`      | `optional` Strength of the gusty sway.                            |
-| opacity               | number                   | `0.9`      | `optional` Flake opacity.                                         |
-| size                  | number                   | `1`        | `optional` Flake size multiplier.                                 |
-| accumulate            | boolean                  | `false`    | `optional` Let snow settle on the scene meshes.                   |
-| accumulationTargets   | Object3D \| Object3D[]   | -          | `optional` Meshes that collect snow; defaults to the whole scene. |
-| accumulationThickness | number                   | `0.1`      | `optional` Thickness of the settled snow shell.                   |
-| accumulationDuration  | number                   | `6`        | `optional` Seconds for the snow to reach full thickness.          |
+| speed                 | number                    | `0.5`      | `optional` Falling speed multiplier.                              |
+| range                 | number                    | `20`       | `optional` Horizontal size of the wrapping box.                   |
+| height                | number                    | `15`       | `optional` Vertical size of the wrapping box.                     |
+| windX                 | number                    | `0.2`      | `optional` Wind drift on the X axis.                              |
+| windZ                 | number                    | `0.1`      | `optional` Wind drift on the Z axis.                              |
+| turbulence            | number                    | `0.8`      | `optional` Strength of the gusty sway.                            |
+| opacity               | number                    | `0.9`      | `optional` Flake opacity.                                         |
+| size                  | number                    | `1`        | `optional` Flake size multiplier.                                 |
+| accumulate            | boolean                   | `false`    | `optional` Let snow settle on the scene meshes.                   |
+| accumulationTargets   | Object3D \| Object3D[]    | -          | `optional` Meshes that collect snow; defaults to the whole scene. |
+| accumulationThickness | number                    | `0.1`      | `optional` Thickness of the settled snow shell.                   |
+| accumulationDuration  | number                    | `6`        | `optional` Seconds for the snow to reach full thickness.          |
 | accumulationColor     | string \| number \| Color | `0xffffff` | `optional` Color of the settled snow.                             |
 
 ## Class usage
 
-The standalone `SnowEffect` is a lightweight point cloud with the same TSL flake shading but no accumulation pass; it also runs on WebGPU and WebGL.
+The standalone `SnowEffect` uses the same snowflake sprites, gusts, wrapping, soft fades and optional accumulation as `<tv-snow>`. It runs on WebGPU and WebGL, follows the camera automatically, and advances its own clock once added to a scene.
 
 ```ts
 import { SnowEffect } from 'three-vue3'
 
-const snow = new SnowEffect({ count: 1200, size: 10 })
+const snow = new SnowEffect({
+  count: 1200,
+  size: 1,
+  accumulate: true,
+  accumulationDuration: 6
+})
 scene.add(snow.mesh)
 
-// Inside the render loop:
-snow.update(delta)
-
-// On teardown:
+// No per-frame update is required. Call update(delta) only to drive the
+// timeline explicitly, and dispose when tearing down:
 snow.dispose()
 ```
+
+By default, snow accumulates on every eligible opaque mesh in the scene. Set `accumulationTargets` to limit accumulation to specific objects; `accumulationThickness`, `accumulationDuration` and `accumulationColor` work exactly like their component props.

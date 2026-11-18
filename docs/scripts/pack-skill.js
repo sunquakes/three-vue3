@@ -65,7 +65,7 @@ const validateSkill = (markdown) => {
 
 const run = () => {
   const skillFile = join(skillDir, 'SKILL.md')
-  validateSkill(readFileSync(skillFile, 'utf8'))
+  validateSkill(readFileSync(skillFile, 'utf8').replace(/\r\n/g, '\n'))
 
   const files = collectFiles(skillDir)
     .map((absolute) => ({

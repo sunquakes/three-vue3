@@ -21,6 +21,7 @@ import FlowLineMeshOptions from './components/meshes/FlowLineMeshOptions.vue'
 import Bloom from './components/effects/Bloom.vue'
 import HeightFogDemo from './components/effects/HeightFogDemo.vue'
 import RainDemo from './components/effects/RainDemo.vue'
+import RainCollisionDemo from './components/effects/RainCollisionDemo.vue'
 import SnowDemo from './components/effects/SnowDemo.vue'
 import SweepLightDemo from './components/effects/SweepLightDemo.vue'
 import LightPillarDemo from './components/effects/LightPillarDemo.vue'
@@ -39,9 +40,12 @@ import ModelRotatorDemo from './components/ModelRotatorDemo.vue'
 import ParameterBusDemo from './components/ParameterBusDemo.vue'
 import SkyDomeDemo from './components/SkyDomeDemo.vue'
 import WaterDemo from './components/effects/WaterDemo.vue'
+import WaterShapeDemo from './components/effects/WaterShapeDemo.vue'
 import WaterPoolDemo from './components/effects/WaterPoolDemo.vue'
+import WaterPoolIrregularDemo from './components/effects/WaterPoolIrregularDemo.vue'
 import SandyBeachDemo from './components/effects/SandyBeachDemo.vue'
 import GeoObjectDemo from './components/gis/GeoObjectDemo.vue'
+import GeoReferenceDemo from './components/gis/GeoReferenceDemo.vue'
 import GeoJsonLayerDemo from './components/gis/GeoJsonLayerDemo.vue'
 import TileLayerDemo from './components/gis/TileLayerDemo.vue'
 import Animation from './components/Animation.vue'
@@ -77,11 +81,11 @@ export default defineClientConfig({
     Home: HomeLayout
   },
   enhance({ app }) {
+    // Register the renderer-aware scene before the plugin so the plugin keeps
+    // this intentional override instead of replacing it with a warning.
+    app.component('tv-scene', RendererScene)
     app.use(ThreeVue3)
     app.use(Antd)
-    // Every demo follows the global WebGPU / WebGL switch, so `tv-scene` is
-    // overridden by a wrapper that binds `renderer-type` and remounts on change.
-    app.component('tv-scene', RendererScene)
     app.component('Scene', Scene)
     app.component('SceneBgImage', SceneBgImage)
     app.component('SceneBgColor', SceneBgColor)
@@ -101,6 +105,7 @@ export default defineClientConfig({
     app.component('Bloom', Bloom)
     app.component('HeightFogDemo', HeightFogDemo)
     app.component('RainDemo', RainDemo)
+    app.component('RainCollisionDemo', RainCollisionDemo)
     app.component('SnowDemo', SnowDemo)
     app.component('SweepLightDemo', SweepLightDemo)
     app.component('LightPillarDemo', LightPillarDemo)
@@ -119,9 +124,12 @@ export default defineClientConfig({
     app.component('ParameterBusDemo', ParameterBusDemo)
     app.component('SkyDomeDemo', SkyDomeDemo)
     app.component('WaterDemo', WaterDemo)
+    app.component('WaterShapeDemo', WaterShapeDemo)
     app.component('WaterPoolDemo', WaterPoolDemo)
+    app.component('WaterPoolIrregularDemo', WaterPoolIrregularDemo)
     app.component('SandyBeachDemo', SandyBeachDemo)
     app.component('GeoObjectDemo', GeoObjectDemo)
+    app.component('GeoReferenceDemo', GeoReferenceDemo)
     app.component('GeoJsonLayerDemo', GeoJsonLayerDemo)
     app.component('TileLayerDemo', TileLayerDemo)
     app.component('Animation', Animation)

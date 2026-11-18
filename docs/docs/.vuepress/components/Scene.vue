@@ -1,5 +1,7 @@
 <template>
-  <tv-scene class="scene" @created="created"></tv-scene>
+  <tv-scene class="scene" @created="created">
+    <slot />
+  </tv-scene>
 </template>
 
 <script lang="ts" setup>

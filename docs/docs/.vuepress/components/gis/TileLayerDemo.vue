@@ -3,10 +3,10 @@
     class="scene"
     bg-color="rgb(40, 42, 54)"
     :origin="ORIGIN"
-    :grid-helper="false"
+    :grid-helper="GRID"
     @created="created"
   >
-    <TileLayer :url="TILE_URL" :zoom="TILE_ZOOM" datum="WGS84" />
+    <TileLayer :url="TILE_URL" :zoom="TILE_ZOOM" datum="GCJ02" :subdomains="TILE_SUBDOMAINS" />
     <GeoObject :coordinate="PIN" datum="WGS84" :object="pinAnchor" />
   </tv-scene>
 </template>
@@ -22,9 +22,15 @@ import type { GeoPoint } from 'three-vue3'
 const PIN: GeoPoint = { lng: 120.60682, lat: 31.330898 }
 const ORIGIN = PIN
 
-// OpenStreetMap standard raster tiles are indexed in WGS84 coordinates.
-const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-const TILE_ZOOM = 15
+// AMap (Gaode) raster tiles are indexed in GCJ02 coordinates. Style 8 serves
+// tiles through maxZoom=19; this demo streams them at zoom 17.
+const TILE_URL =
+  'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}'
+const TILE_SUBDOMAINS = ['1', '2', '3', '4']
+const TILE_ZOOM = 17
+
+// City-scale grid options; Scene builds and disposes the GridHelper.
+const GRID = { size: 1400, divisions: 28, colorCenterLine: 0x4a6fa5, colorGrid: 0x2f3e5c }
 
 // Anchor built in the scene `created` handler; GeoObject only positions and
 // parents it, so the demo disposes it on unmount.
@@ -32,8 +38,9 @@ const pinAnchor = shallowRef<THREE.Object3D>()
 
 const created = (scene: THREE.Scene, { camera }: { camera: THREE.PerspectiveCamera }) => {
   // A fixed south-side viewpoint keeps the raster map readable like a
-  // conventional map; looking north from due south keeps it north-up.
-  scene.setPosition(camera, { x: 0, y: 600, z: 850 })
+  // conventional map; looking north from due south keeps it north-up. The
+  // 45-degree depression keeps every frustum corner ray on the ground.
+  scene.setPosition(camera, { x: 0, y: 450, z: 450 })
   camera.lookAt(0, 0, 0)
 
   const anchor = new THREE.Group()

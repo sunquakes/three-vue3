@@ -330,7 +330,7 @@ export default defineComponent({
       type: Object as PropType<THREE.Object3D>
     },
     axesHelper: {
-      type: Object as PropType<THREE.AxesHelper | boolean>
+      type: [Object, Boolean] as PropType<THREE.AxesHelper | boolean>
     },
     gridHelper: {
       type: [Object, Boolean] as PropType<THREE.GridHelper | GridHelperOptions | boolean>
