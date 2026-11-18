@@ -13,6 +13,7 @@
 ### Fixed
 
 - Stabilize Sandy Beach WebGPU rendering and eliminate horizontal water bands.
+- Add package repository metadata required for npm provenance validation.
 
 ---
 
