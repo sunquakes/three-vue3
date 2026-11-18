@@ -4,6 +4,10 @@
   "version": "0.1.0",
   "packageManager": "pnpm@11.17.0",
   "author": "Shing Rui <sunquakes@outlook.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunquakes/three-vue3.git"
+  },
   "keywords": [
     "three.js",
     "vue",
