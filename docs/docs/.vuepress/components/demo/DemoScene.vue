@@ -5,12 +5,7 @@
 -->
 <template>
   <main class="demo-page">
-    <tv-scene
-      class="demo-canvas"
-      bg-color="rgb(16, 8, 8)"
-      :axes-helper="false"
-      :grid-helper="false"
-    >
+    <tv-scene class="demo-canvas" bg-color="rgb(16, 8, 8)">
       <MartianDemo
         :captions="captions"
         @caption="caption = $event"
