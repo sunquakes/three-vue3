@@ -17,7 +17,7 @@ const created = async (scene, { camera }) => {
   // Load the animated model and play every clip.
   const model = await GLTFLoader('/models/perseverance-draco.glb', { draco: true })
   model.scale.set(0.7, 0.7, 0.7)
-  model.position.set(0, 0, 0)
+  model.position.set(0, -0.25, 0)
   scene.add(model)
 
   animation = new Animation(model)
@@ -33,9 +33,10 @@ onBeforeUnmount(() => {
 
 <style>
 .index-animation {
-  display: inline-block;
-  width: 310px;
-  height: 250px;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 250px;
 }
 
 .index-animation .scene {

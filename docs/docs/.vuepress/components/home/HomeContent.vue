@@ -26,9 +26,6 @@
         <div class="home-section__inner home-showcase">
           <div class="home-stage">
             <IndexAnimation />
-            <a class="home-stage__overlay" :href="links.demo" :aria-label="copy.stageLabel">
-              <span class="home-stage__hint">{{ copy.stageHint }}</span>
-            </a>
           </div>
           <div class="home-code">
             <div class="home-code__window">
@@ -153,8 +150,6 @@ interface HomeCopy {
   demo: string
   ai: string
   github: string
-  stageLabel: string
-  stageHint: string
   demoTitle: string
   demoDescription: string
   demoCta: string
@@ -219,8 +214,6 @@ const copy = computed<HomeCopy>(() =>
         demo: '在线 3D 演示',
         ai: 'AI 智能体',
         github: 'GitHub',
-        stageLabel: '打开在线 3D 演示',
-        stageHint: '打开在线演示 →',
         demoTitle: '在线 3D 演示',
         demoDescription: '浏览一个完全由 three-vue3 构建的完整 3D 场景。',
         demoCta: '打开演示',
@@ -285,8 +278,6 @@ const copy = computed<HomeCopy>(() =>
         demo: 'Live 3D Demo',
         ai: 'AI Agents',
         github: 'GitHub',
-        stageLabel: 'Open the live 3D demo',
-        stageHint: 'Open the demo →',
         demoTitle: 'Live 3D Demo',
         demoDescription: 'Explore a full 3D scene built entirely with three-vue3.',
         demoCta: 'Open the Demo',
@@ -485,27 +476,6 @@ const copy = computed<HomeCopy>(() =>
   width: 100%;
   height: 100%;
   margin: 0;
-}
-
-.home-stage__overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: block;
-  text-decoration: none;
-}
-
-.home-stage__hint {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--vp-c-text);
-  border: 1px solid var(--vp-c-border);
-  border-radius: 999px;
-  background: var(--vp-c-bg);
 }
 
 .home-code {
