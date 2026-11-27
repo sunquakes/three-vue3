@@ -103,6 +103,16 @@ them:
    `create-release.yml`. The tag must match `*.*.*` and equal the `version` in
    `package.json`; never re-tag an already published version.
 
+## Pull requests
+
+- Do feature work on a temporary branch; never commit directly to `main` or
+  `develop`.
+- Open the pull request against `develop` and merge it.
+- After the pull request is merged, delete the temporary branch both locally
+  and on the remote: `git branch -d <branch>` and
+  `git push origin --delete <branch>`. Confirm with `git branch -a` and
+  `git ls-remote --heads origin`.
+
 ## Do not
 
 - Do not commit `dist/` output or edit generated bundles.
